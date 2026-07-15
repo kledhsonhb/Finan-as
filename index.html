@@ -285,7 +285,8 @@
   .bank-strip{ display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
   .bank-card{ background:var(--white); border:1px solid var(--line); border-radius:10px; padding:12px 16px;
     display:flex; align-items:center; gap:10px; flex:1; min-width:180px; }
-  .bank-card .tag-dot{ width:10px;height:10px;border-radius:50%;flex:none; }
+  .bank-card .bank-logo{ width:24px;height:24px;border-radius:8px;flex:none; display:flex;align-items:center;justify-content:center;
+    color:#fff; font-family:'Fraunces',serif; font-weight:800; font-size:13px; box-shadow:0 1px 2px rgba(0,0,0,0.18); }
   .bank-card .bc-name{ font-weight:700; font-size:13.5px; white-space:nowrap; }
   .bank-card input{ width:100%; text-align:right; font-weight:700; }
   .bank-card.total{ background:var(--ink); color:var(--paper); justify-content:space-between; flex:1.2; }
@@ -294,12 +295,12 @@
   /* versão compacta -- usada no Fluxo de Caixa, cartões menores pra caber mais coisa na tela */
   .bank-strip.compact{ gap:10px; margin-bottom:14px; }
   .bank-strip.compact .bank-card{ padding:7px 10px; gap:7px; min-width:130px; border-radius:8px; }
+  .bank-strip.compact .bank-card .bank-logo{ width:20px;height:20px;border-radius:6px;font-size:11px; }
   .bank-strip.compact .bank-card .bc-name{ font-size:12px; }
   .bank-strip.compact .bank-card input{ font-size:13px; }
   .bank-strip.compact .bank-card.total{ min-width:150px; }
   .bank-strip.compact .bank-card.total span:last-child{ font-size:14px; }
   .bank-card.dual{ flex-direction:column; align-items:stretch; gap:4px; min-width:150px; }
-  .bank-card.dual .tag-dot{ display:none; }
   .bank-card.dual .bc-name{ margin-bottom:1px; }
   .bank-card.dual .bc-dual-inputs{ display:flex; gap:6px; }
   .bank-card.dual .bc-dual-inputs input{ min-width:0; }
@@ -507,17 +508,16 @@
 <div class="wrap">
 
   <div class="tabs">
-    <button class="tab-btn active" data-view="lancamentos">Orçamento</button>
+    <button class="tab-btn" data-view="lancamentos">Orçamento</button>
     <button class="tab-btn" data-view="dashboard-pf">Fluxo de Caixa</button>
     <button class="tab-btn" data-view="investimentos">Entrada Investimentos</button>
-    <button class="tab-btn" data-view="relatorio-inv">Dashboard Financeiro</button>
-    <button class="tab-btn" data-view="cotacao-dolar">Investimento Variável</button>
+    <button class="tab-btn active" data-view="relatorio-inv">Dashboard Financeiro</button>
   </div>
 
   <div class="status" id="statusMsgPF">carregando...</div>
 
   <!-- ============ VIEW: LANÇAMENTOS ============ -->
-  <div class="view active" id="view-lancamentos">
+  <div class="view" id="view-lancamentos">
     <div class="panel">
       <h2>Novo lançamento</h2>
       <div class="toggle" id="tipoToggle">
@@ -634,16 +634,15 @@
         <div class="resumo-mes-fluxo">
           <div class="resumo-mes-fluxo-split">
             <div class="bank-strip compact vertical">
-              <div class="bank-card"><span class="tag-dot" style="background:#8A05BE;"></span><span class="bc-name">Nubank</span><input type="text" inputmode="decimal" id="bNubank" class="input-moeda"></div>
+              <div class="bank-card"><span class="bank-logo" style="background:#8A05BE;">N</span><span class="bc-name">Nubank</span><input type="text" inputmode="decimal" id="bNubank" class="input-moeda"></div>
               <div class="bank-card dual">
-                <span class="tag-dot" style="background:#EC0000;"></span>
-                <div class="bc-name">Santander</div>
+                <div class="bc-name" style="display:flex;align-items:center;gap:7px;"><span class="bank-logo" style="background:#EC0000;">S</span>Santander</div>
                 <div class="bc-dual-inputs">
                   <input type="text" inputmode="decimal" id="bSantander" class="input-moeda" placeholder="Conta 1">
                   <input type="text" inputmode="decimal" id="bSantander2" class="input-moeda" placeholder="Conta 2">
                 </div>
               </div>
-              <div class="bank-card"><span class="tag-dot" style="background:#1B2A4A;"></span><span class="bc-name">XP</span><input type="text" inputmode="decimal" id="bXP" class="input-moeda"></div>
+              <div class="bank-card"><span class="bank-logo" style="background:#000000;">X</span><span class="bc-name">XP</span><input type="text" inputmode="decimal" id="bXP" class="input-moeda"></div>
               <div class="bank-card total"><span class="bc-name">Saldo inicial (bancos)</span><span id="bTotal">R$ 0,00</span></div>
             </div>
             <div class="saldo-cards compact" id="saldoCards"></div>
@@ -841,10 +840,10 @@
     </div>
   </div>
 
-  <div class="view" id="view-relatorio-inv">
+  <div class="view active" id="view-relatorio-inv">
     <div class="panel">
       <h2>Visão geral — total investido</h2>
-      <p class="desc">Escolha um mês pra ver o valor aberto por tipo de investimento, o ganho daquele mês (aporte x juros) e a comparação entre dois períodos — tudo num só lugar.</p>
+      <p class="desc">Escolha um mês pra ver o valor aberto por banco, o ganho daquele mês (aporte x juros) e a comparação entre dois períodos — tudo num só lugar.</p>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:18px;">
         <div>
           <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);">Mês de referência</label>
@@ -858,7 +857,7 @@
 
       <div class="resumo-inv-grid">
         <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Valor aberto por tipo</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Valor aberto por banco</div>
           <div id="valorPorTipoWrap"></div>
         </div>
         <div>
@@ -1368,7 +1367,7 @@ document.querySelectorAll('.mega-tab').forEach(btn=>{
 
     // ao entrar em cada módulo, sempre abre na aba padrão escolhida (não na última usada)
     if(btn.dataset.modulo==='planejamento'){
-      document.querySelector('#modulo-planejamento .tab-btn[data-view="lancamentos"]')?.click();
+      document.querySelector('#modulo-planejamento .tab-btn[data-view="relatorio-inv"]')?.click();
     }else if(btn.dataset.modulo==='cartao'){
       document.querySelector('#modulo-cartao .tab-btn[data-view="resumo"]')?.click();
     }else if(btn.dataset.modulo==='acoes'){
@@ -3280,26 +3279,41 @@ function tipoAgrupadoInvestimento(inv){
 }
 
 // painel "valor aberto por tipo" + "ganho do mês (aporte x juros), por tipo" -- ao lado do seletor de mês
+// cor do selo de cada banco no "valor aberto por banco" -- usa a cor oficial pros bancos
+// conhecidos, e gera uma cor estável (sempre a mesma pro mesmo nome) pra rótulos customizados
+// como "Dólar", "Previdência Privada" ou "Ação BBSE".
+const CORES_BANCO_CONHECIDO = { 'Nubank':'#8A05BE', 'Santander':'#EC0000', 'XP':'#000000' };
+const PALETA_BANCO_CUSTOM = ['#1F7A4D','#B9842E','#C23B22','#1B6FA8','#A85C1B','#5B6478','#D9651D','#3F7D5C','#9C4221','#6B5BAE'];
+function corBancoInv(nome){
+  if(CORES_BANCO_CONHECIDO[nome]) return CORES_BANCO_CONHECIDO[nome];
+  let hash = 0;
+  for(let i=0;i<nome.length;i++) hash = nome.charCodeAt(i) + ((hash<<5)-hash);
+  return PALETA_BANCO_CUSTOM[Math.abs(hash) % PALETA_BANCO_CUSTOM.length];
+}
+
 function renderPainelPorTipo(mSel, projecoes, labelsMensal){
   const wrapValor = document.getElementById('valorPorTipoWrap');
   const wrapGanho = document.getElementById('ganhoMesWrap');
   if(!wrapValor || !wrapGanho) return;
 
-  // ---- valor aberto por tipo, no mês selecionado ----
-  const valorPorTipo = {};
+  // ---- valor aberto por banco, no mês selecionado ----
+  // usa o campo "banco" de cada investimento pra separar -- inclui tanto bancos/corretoras de
+  // verdade (Nubank, Santander, XP) quanto qualquer rótulo customizado que a pessoa tenha usado
+  // ali (ex: "Dólar", "Previdência Privada", "Ação BBSE"), já que cada um vira seu próprio grupo.
+  const valorPorBanco = {};
   projecoes.forEach(p=>{
     const v = p.porMes[mSel];
     if(v===null || v===undefined) return;
-    const tipo = tipoAgrupadoInvestimento(p.inv);
-    valorPorTipo[tipo] = (valorPorTipo[tipo]||0) + v;
+    const banco = (p.inv.banco||'').trim() || 'Outro';
+    valorPorBanco[banco] = (valorPorBanco[banco]||0) + v;
   });
-  const totalMes = Object.values(valorPorTipo).reduce((s,v)=>s+v,0);
-  const coresTipo = { 'Renda Fixa':'#1B2A4A', 'Dólar':'#1F7A4D', 'Ações':'#B9842E' };
-  wrapValor.innerHTML = ORDEM_TIPOS_INV.filter(t=>valorPorTipo[t]!==undefined).map(t=>{
-    const v = valorPorTipo[t];
+  const totalMes = Object.values(valorPorBanco).reduce((s,v)=>s+v,0);
+  const bancosOrdenados = Object.keys(valorPorBanco).sort((a,b)=> valorPorBanco[b]-valorPorBanco[a]);
+  wrapValor.innerHTML = bancosOrdenados.map(banco=>{
+    const v = valorPorBanco[banco];
     const pct = totalMes ? (v/totalMes*100) : 0;
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
-      <span style="display:flex;align-items:center;gap:8px;"><span style="width:9px;height:9px;border-radius:50%;background:${coresTipo[t]||'var(--ink-soft)'};display:inline-block;"></span>${t}</span>
+      <span style="display:flex;align-items:center;gap:8px;"><span class="bank-logo" style="width:21px;height:21px;font-size:10.5px;border-radius:6px;background:${corBancoInv(banco)};">${banco.charAt(0).toUpperCase()}</span>${banco}</span>
       <span style="text-align:right;"><strong>${fmt(v)}</strong> <span style="font-size:11px;color:var(--ink-soft);">(${pct.toFixed(1)}%)</span></span>
     </div>`;
   }).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Sem dados pra este mês.</p>';
@@ -3754,15 +3768,17 @@ function renderRelatorioInvestimentos(){
   ultimosLabelsMensalInv = labelsMensal;
   renderGraficosInvestimentos(projecoes, labelsMensal);
 
-  const MARCOS_MENSAIS = [
-    { valor: 800000,  titulo: 'R$ 800k atingido!' },
-    { valor: 900000,  titulo: 'R$ 900k atingido!' },
-    { valor: 1000000, titulo: 'R$ 1 milhão atingido!' },
-  ];
-  const MARCOS_ANUAIS = [
-    { valor: 2000000, titulo: 'R$ 2 milhões atingido!' },
-    { valor: 3000000, titulo: 'R$ 3 milhões atingido!' },
-  ];
+  // gera marcos redondos automaticamente (de 100 mil em 100 mil até 1 milhão, depois de 1 em
+  // 1 milhão) cobrindo até um pouco acima do maior valor que a própria projeção atinge — assim
+  // não fica preso numa lista fixa, e escala sozinho pra qualquer patamar (800k, 900k, 1mm,
+  // 2mm, 3mm... o quanto for preciso).
+  const fmtMarco = (v) => v>=1000000 ? ('R$ '+Math.round(v/1000000)+(v>1000000?' milhões':' milhão')) : ('R$ '+Math.round(v/1000)+' mil');
+  const gerarMarcosAte = (valorMaximo) => {
+    const marcos = [];
+    for(let v=100000; v<1000000 && v<=valorMaximo; v+=100000) marcos.push({ valor:v, titulo: fmtMarco(v)+' atingido!' });
+    for(let v=1000000; v<=valorMaximo; v+=1000000) marcos.push({ valor:v, titulo: fmtMarco(v)+' atingido!' });
+    return marcos;
+  };
 
   // detecta em qual coluna cada marco é atingido (primeira vez que cruza)
   const detectarMarcos = (totais, marcos) => {
@@ -3791,7 +3807,7 @@ function renderRelatorioInvestimentos(){
       valores.forEach((v,i)=>{ if(v!==null) totalPorMes[i]+=v; });
       return { nome: p.inv.nome+tagVariavel, valores };
     });
-    const marcosNaCol = detectarMarcos(totalPorMes, MARCOS_MENSAIS);
+    const marcosNaCol = detectarMarcos(totalPorMes, gerarMarcosAte(Math.max(...totalPorMes, 0)));
     const rows = linhas.map(l=>`<tr><td>${l.nome}</td>` + l.valores.map(v=>v===null?'<td style="color:var(--ink-soft);">—</td>':`<td>${fmtSemDecimais(v)}</td>`).join('') + '</tr>').join('');
     headM = headComMarcas(labelsMensal, marcosNaCol);
     const totalCel = (v,i) => marcosNaCol[i]
@@ -3821,7 +3837,7 @@ function renderRelatorioInvestimentos(){
       valoresAnuais.forEach((v,i)=>{ if(v!==null && v!==undefined) totalPorAno[i]+=v; });
       return { nome: p.inv.nome+tagVariavel, valores: valoresAnuais };
     });
-    const marcosNaCol = detectarMarcos(totalPorAno, MARCOS_ANUAIS);
+    const marcosNaCol = detectarMarcos(totalPorAno, gerarMarcosAte(Math.max(...totalPorAno, 0)));
     const rows = linhas.map(l=>`<tr><td>${l.nome}</td>` + l.valores.map(v=>(v===null||v===undefined)?'<td style="color:var(--ink-soft);">—</td>':`<td>${fmtSemDecimais(v)}</td>`).join('') + '</tr>').join('');
     headA = headComMarcas(labelsAnual, marcosNaCol);
     const totalCel = (v,i) => marcosNaCol[i]
