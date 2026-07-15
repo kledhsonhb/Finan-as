@@ -667,8 +667,8 @@
     </div>
 
     <div class="panel">
-      <h2>Fluxo de caixa — projeção 12 meses</h2>
-      <p class="desc">Totais fechados por categoria, mês a mês. Pra ver o detalhe de qualquer mês, use o "Resumo do mês" ali acima.</p>
+      <h2>Fluxo de caixa — projeção até dez/27</h2>
+      <p class="desc">Totais fechados por categoria, mês a mês, do mês atual até dezembro do ano que vem. Pra ver o detalhe de qualquer mês, use o "Resumo do mês" ali acima.</p>
       <div class="report-table-wrap"><table class="report-table" id="tabelaFluxo12Simples"></table></div>
     </div>
   </div>
@@ -1716,7 +1716,7 @@ function getMesesSimples12(){
 
 function renderMesesFiltroLanc(){
   const cont = document.getElementById('mesesFiltroLanc');
-  const mkeys = getMesesSimples12();
+  const mkeys = getMesesResumoFluxo();
   const labels = mkeys.map(mk=>{
     const [y,m] = mk.split('-');
     return MESES[Number(m)-1].slice(0,3).toUpperCase()+'/'+y.slice(2);
@@ -1921,31 +1921,40 @@ function montarLinhaLancEdicao(tr, l){
       <button class="del-btn btn-cancelar" title="Cancelar">↩</button>
     </td>`;
 
-  // se esse lançamento faz parte de uma série (repetição/parcelas), mostra logo abaixo os
-  // controles pra mexer no número de parcelas e decidir se a edição vale só pra esse mês
-  // ou daqui pra frente também.
-  let trLote = null;
-  if(l.lote){
-    const serieAtual = lancamentos.filter(x=>x.lote===l.lote).sort((a,b)=>a.data.localeCompare(b.data));
-    trLote = document.createElement('tr');
-    trLote.className = 'lanc-lote-controls';
-    trLote.innerHTML = `<td colspan="9" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
-      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;">
-        <span style="color:var(--ink-soft);">📋 Faz parte de uma série com <strong>${serieAtual.length}</strong> parcela(s).</span>
-        <label style="display:flex;align-items:center;gap:6px;">
-          Total de parcelas da série:
-          <input type="number" min="1" class="ed-lote-total" value="${serieAtual.length}" style="width:70px;min-height:auto;padding:4px 6px;">
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-          <input type="checkbox" class="ed-lote-aplicar-frente" style="width:auto;min-height:auto;">
-          Aplicar descrição/valor/categoria/banco/tipo deste mês em diante também
-        </label>
-      </div>
-    </td>`;
-    tr.insertAdjacentElement('afterend', trLote);
-  }
+  // controles extras logo abaixo da linha de edição: se já faz parte de uma série, mexe no
+  // número de parcelas; se é um lançamento avulso, oferece "prorrogar" — criar mais meses a
+  // partir dele, virando uma série a partir de agora (útil quando os dados só vão até um mês
+  // X e é preciso estender pra frente, sem recriar tudo do zero).
+  const serieAtual = l.lote ? lancamentos.filter(x=>x.lote===l.lote).sort((a,b)=>a.data.localeCompare(b.data)) : [];
+  const trLote = document.createElement('tr');
+  trLote.className = 'lanc-lote-controls';
+  trLote.innerHTML = l.lote
+    ? `<td colspan="9" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;">
+          <span style="color:var(--ink-soft);">📋 Faz parte de uma série com <strong>${serieAtual.length}</strong> parcela(s).</span>
+          <label style="display:flex;align-items:center;gap:6px;">
+            Total de parcelas da série:
+            <input type="number" min="1" class="ed-lote-total" value="${serieAtual.length}" style="width:70px;min-height:auto;padding:4px 6px;">
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" class="ed-lote-aplicar-frente" style="width:auto;min-height:auto;">
+            Aplicar descrição/valor/categoria/banco/tipo deste mês em diante também
+          </label>
+        </div>
+      </td>`
+    : `<td colspan="9" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;">
+          <span style="color:var(--ink-soft);">📅 Lançamento avulso (sem série ainda).</span>
+          <label style="display:flex;align-items:center;gap:6px;">
+            Prorrogar: repetir por mais
+            <input type="number" min="0" value="0" class="ed-prorrogar-meses" style="width:60px;min-height:auto;padding:4px 6px;">
+            mês(es) a partir daqui
+          </label>
+        </div>
+      </td>`;
+  tr.insertAdjacentElement('afterend', trLote);
 
-  const cancelar = ()=>{ if(trLote) trLote.remove(); montarLinhaLancVisualizacao(tr, l); };
+  const cancelar = ()=>{ trLote.remove(); montarLinhaLancVisualizacao(tr, l); };
   tr.querySelector('.btn-cancelar').addEventListener('click', cancelar);
   tr.querySelector('.btn-salvar').addEventListener('click', async ()=>{
     const novaData = tr.querySelector('.ed-data').value || l.data;
@@ -1988,6 +1997,23 @@ function montarLinhaLancEdicao(tr, l){
       }
     }else{
       l.data = novaData; l.desc = novoDesc; l.categoria = novaCategoria; l.banco = novoBanco; l.tipo = novoTipo; l.valor = novoValor; l.pago = novoPago;
+
+      // prorrogar: se pediu pra repetir por mais meses, vira uma série a partir de agora
+      const meses = Math.max(0, parseInt(trLote.querySelector('.ed-prorrogar-meses').value) || 0);
+      if(meses > 0){
+        const loteId = 'lote_'+Date.now().toString(36);
+        l.lote = loteId;
+        const [y,m,d] = l.data.split('-').map(Number);
+        for(let i=1;i<=meses;i++){
+          const dt = new Date(y, (m-1)+i, d);
+          lancamentos.push({
+            id: 'l_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
+            data: dt.toISOString().slice(0,10),
+            desc: l.desc, categoria: l.categoria, banco: l.banco, tipo: l.tipo, valor: l.valor,
+            lote: loteId
+          });
+        }
+      }
     }
 
     await saveLancamentos();
@@ -2112,17 +2138,32 @@ function aplicarCorValor(el, valor){
 });
 
 /* ===================== DASHBOARD ===================== */
+// meses do "Resumo do mês" no Fluxo de Caixa: do mês atual até dezembro do ano que vem
+// (ex: hoje jul/26 → vai até dez/27) -- mais fôlego pra já planejar/conferir meses mais à
+// frente, sem mexer nos 12 meses fixos usados no filtro do Orçamento e na tabela de projeção.
+function getMesesResumoFluxo(){
+  const meses = [];
+  const cursor = new Date(); cursor.setDate(1);
+  const anoFim = cursor.getFullYear() + 1;
+  while(true){
+    meses.push(monthKey(cursor));
+    if(cursor.getFullYear() === anoFim && cursor.getMonth() === 11) break; // dezembro do ano que vem
+    cursor.setMonth(cursor.getMonth()+1);
+  }
+  return meses;
+}
+
 function calcularFluxoMeses(){
-  const mkeys = getMesesSimples12();
-  const totalEntradas = new Array(12).fill(0), totalSaidas = new Array(12).fill(0);
+  const mkeys = getMesesResumoFluxo();
+  const totalEntradas = new Array(mkeys.length).fill(0), totalSaidas = new Array(mkeys.length).fill(0);
   mkeys.forEach((mk,i)=>{
     lancamentos.filter(l=>l.data.slice(0,7)===mk && !l.pago).forEach(l=>{
       if(l.tipo==='entrada') totalEntradas[i]+=Number(l.valor); else totalSaidas[i]+=Number(l.valor);
     });
   });
   const totalBancosHoje = Object.values(bancoSaldos).reduce((s,v)=>s+Number(v||0),0);
-  const saldoInicial = new Array(12).fill(0), saldoFinal = new Array(12).fill(0);
-  for(let i=0;i<12;i++){
+  const saldoInicial = new Array(mkeys.length).fill(0), saldoFinal = new Array(mkeys.length).fill(0);
+  for(let i=0;i<mkeys.length;i++){
     saldoInicial[i] = i===0 ? totalBancosHoje : saldoFinal[i-1];
     saldoFinal[i] = saldoInicial[i] + totalEntradas[i] - totalSaidas[i];
   }
@@ -2260,28 +2301,29 @@ function renderDetalheMes(){
 }
 
 function renderFluxo12Simples(){
-  const mkeys = getMesesSimples12();
+  const mkeys = getMesesResumoFluxo();
   const labels = mkeys.map(mk=>{
     const [y,m] = mk.split('-');
     return MESES[Number(m)-1].slice(0,3).toUpperCase()+'/'+y.slice(2);
   });
+  const n = mkeys.length;
 
-  // agrupa por tipo -> categoria -> [12 totais], só pendentes (não realizados)
+  // agrupa por tipo -> categoria -> [totais], só pendentes (não realizados)
   const struct = { entrada:{}, saida:{} };
   mkeys.forEach((mk,mi)=>{
     lancamentos.filter(l=>l.data.slice(0,7)===mk && !l.pago).forEach(l=>{
       const cat = l.categoria && l.categoria.trim() ? l.categoria.trim() : 'Outros';
-      struct[l.tipo][cat] = struct[l.tipo][cat] || new Array(12).fill(0);
+      struct[l.tipo][cat] = struct[l.tipo][cat] || new Array(n).fill(0);
       struct[l.tipo][cat][mi] += Number(l.valor);
     });
   });
 
-  const totalEntradas = new Array(12).fill(0), totalSaidas = new Array(12).fill(0);
+  const totalEntradas = new Array(n).fill(0), totalSaidas = new Array(n).fill(0);
   let corpo = '';
   ['entrada','saida'].forEach(tipo=>{
     const categorias = struct[tipo];
     const nomesCats = Object.keys(categorias).sort();
-    const totalArr = new Array(12).fill(0);
+    const totalArr = new Array(n).fill(0);
     nomesCats.forEach(cat=> categorias[cat].forEach((v,i)=> totalArr[i]+=v));
     if(tipo==='entrada') totalArr.forEach((v,i)=>totalEntradas[i]=v); else totalArr.forEach((v,i)=>totalSaidas[i]=v);
 
@@ -2294,8 +2336,8 @@ function renderFluxo12Simples(){
   });
 
   const totalBancosHoje = Object.values(bancoSaldos).reduce((s,v)=>s+Number(v||0),0);
-  const saldoInicial = new Array(12).fill(0), saldoFinal = new Array(12).fill(0);
-  for(let i=0;i<12;i++){
+  const saldoInicial = new Array(n).fill(0), saldoFinal = new Array(n).fill(0);
+  for(let i=0;i<n;i++){
     saldoInicial[i] = i===0 ? totalBancosHoje : saldoFinal[i-1];
     saldoFinal[i] = saldoInicial[i] + totalEntradas[i] - totalSaidas[i];
   }
