@@ -2214,7 +2214,7 @@ function renderDetalheMes(){
       const aberta = categoriasAbertasFluxo.has(catId);
       const itensHtml = itens.sort((a,b)=>b.data.localeCompare(a.data)).map(l=>`
         <div class="item-lanc">
-          <span class="il-desc">${l.desc}</span>
+          <span class="il-desc"><input type="checkbox" class="chk-realizado-detalhe" data-id="${l.id}" title="Marcar como realizado" style="width:auto;min-height:auto;vertical-align:middle;margin-right:7px;">${l.desc}</span>
           <span class="il-val">${fmt(l.valor)}</span>
         </div>`).join('');
       return `
@@ -2241,6 +2241,18 @@ function renderDetalheMes(){
       if(categoriasAbertasFluxo.has(id)) categoriasAbertasFluxo.delete(id);
       else categoriasAbertasFluxo.add(id);
       renderDetalheMes();
+    });
+  });
+
+  document.querySelectorAll('.chk-realizado-detalhe').forEach(chk=>{
+    chk.addEventListener('click', (e)=> e.stopPropagation()); // não deixa o clique também abrir/fechar a categoria
+    chk.addEventListener('change', async (e)=>{
+      const l = lancamentos.find(x=>x.id===e.target.dataset.id);
+      if(!l) return;
+      l.pago = e.target.checked;
+      await saveLancamentos();
+      renderDetalheMes();
+      renderResumoMes();
     });
   });
 
