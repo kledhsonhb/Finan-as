@@ -3314,8 +3314,8 @@ function renderPainelPorTipo(mSel, projecoes, labelsMensal){
     const v = valorPorBanco[banco];
     const pct = totalMes ? (v/totalMes*100) : 0;
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
-      <span style="display:flex;align-items:center;gap:8px;"><span class="bank-logo" style="width:21px;height:21px;font-size:10.5px;border-radius:6px;background:${corBancoInv(banco)};">${banco.charAt(0).toUpperCase()}</span><span style="font-size:12px;">${formatarNomeBanco(banco)}</span></span>
-      <span style="text-align:right;"><strong>${fmt(v)}</strong> <span style="font-size:11px;color:var(--ink-soft);">(${pct.toFixed(1)}%)</span></span>
+      <span style="display:flex;align-items:center;gap:8px;"><span class="bank-logo" style="width:21px;height:21px;font-size:10.5px;border-radius:6px;background:${corBancoInv(banco)};">${banco.charAt(0).toUpperCase()}</span><span style="font-size:14px;">${formatarNomeBanco(banco)}</span></span>
+      <span style="text-align:right;"><strong style="font-size:12.5px;">${fmt(v)}</strong> <span style="font-size:11px;color:var(--ink-soft);">(${pct.toFixed(1)}%)</span></span>
     </div>`;
   }).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Sem dados pra este mês.</p>';
 
