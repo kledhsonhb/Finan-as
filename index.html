@@ -291,6 +291,18 @@
   .bank-card.total{ background:var(--ink); color:var(--paper); justify-content:space-between; flex:1.2; }
   .bank-card.total .bc-name{ font-size:12px; text-transform:uppercase; letter-spacing:0.6px; color:rgba(246,241,231,0.7); }
   .bank-card.total span:last-child{ font-weight:800; font-size:16px; }
+  /* versão compacta -- usada no Fluxo de Caixa, cartões menores pra caber mais coisa na tela */
+  .bank-strip.compact{ gap:10px; margin-bottom:14px; }
+  .bank-strip.compact .bank-card{ padding:7px 10px; gap:7px; min-width:130px; border-radius:8px; }
+  .bank-strip.compact .bank-card .bc-name{ font-size:12px; }
+  .bank-strip.compact .bank-card input{ font-size:13px; }
+  .bank-strip.compact .bank-card.total{ min-width:150px; }
+  .bank-strip.compact .bank-card.total span:last-child{ font-size:14px; }
+  .bank-card.dual{ flex-direction:column; align-items:stretch; gap:4px; min-width:150px; }
+  .bank-card.dual .tag-dot{ display:none; }
+  .bank-card.dual .bc-name{ margin-bottom:1px; }
+  .bank-card.dual .bc-dual-inputs{ display:flex; gap:6px; }
+  .bank-card.dual .bc-dual-inputs input{ min-width:0; }
 
   /* dashboard / fluxo de caixa agrupável */
   .saldo-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
@@ -299,6 +311,24 @@
   .saldo-card .sc-lbl{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
   .saldo-card.destaque .sc-val{ color:var(--gold); }
   .saldo-card.neg .sc-val{ color:var(--red); }
+  .saldo-cards.compact{ grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:8px; margin-bottom:8px; }
+  .saldo-cards.compact .saldo-card{ padding:9px 6px; border-radius:8px; }
+  .saldo-cards.compact .saldo-card .sc-val{ font-size:16px; }
+  .saldo-cards.compact .saldo-card .sc-lbl{ font-size:9.5px; }
+
+  /* Resumo do mês: saldo de bancos + fluxo do lado esquerdo (dividido ao meio), entradas/saídas detalhadas à direita */
+  .resumo-mes-2col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+  .resumo-mes-fluxo{ position:sticky; top:12px; }
+  .resumo-mes-fluxo-split{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .resumo-mes-fluxo-split .bank-strip.compact.vertical{ flex-direction:column; }
+  .resumo-mes-fluxo-split .saldo-cards.compact{ grid-template-columns:1fr; }
+  @media (max-width:900px){
+    .resumo-mes-2col{ grid-template-columns:1fr; gap:20px; }
+    .resumo-mes-fluxo{ position:static; order:-1; }
+  }
+  @media (max-width:560px){
+    .resumo-mes-fluxo-split{ grid-template-columns:1fr; }
+  }
 
   .grupo-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 14px;
     background:var(--paper-2); border-radius:7px; margin-top:8px; cursor:pointer; font-weight:700; font-size:13.5px; }
@@ -596,42 +626,44 @@
   <!-- ============ VIEW: DASHBOARD ============ -->
   <div class="view" id="view-dashboard-pf">
     <div class="panel">
-      <h2>Saldos em bancos</h2>
-      <p class="desc">Atualize manualmente o saldo atual de cada conta.</p>
-      <div class="bank-strip">
-        <div class="bank-card"><span class="tag-dot" style="background:#8A05BE;"></span><span class="bc-name">Nubank</span><input type="text" inputmode="decimal" id="bNubank" class="input-moeda"></div>
-        <div class="bank-card"><span class="tag-dot" style="background:#EC0000;"></span><span class="bc-name">Santander</span><input type="text" inputmode="decimal" id="bSantander" class="input-moeda"></div>
-        <div class="bank-card"><span class="tag-dot" style="background:#1B2A4A;"></span><span class="bc-name">XP</span><input type="text" inputmode="decimal" id="bXP" class="input-moeda"></div>
-        <div class="bank-card total"><span class="bc-name">Total em bancos</span><span id="bTotal">R$ 0,00</span></div>
-      </div>
-    </div>
-
-    <div class="panel">
       <h2>Resumo do mês</h2>
-      <p class="desc">Clique num mês pra ver o resumo e o detalhamento daquele período (baseado em bancos + entradas − saídas, encadeado mês a mês).</p>
+      <p class="desc">Clique num mês pra ver o resumo daquele período. O saldo dos bancos ali ao lado é sempre o ponto de partida — some tudo, e o restante é entradas menos saídas até chegar no saldo final.</p>
       <div class="month-ruler" id="mesesResumoRuler" style="margin-bottom:14px;"></div>
-      <div class="saldo-cards" id="saldoCards"></div>
-    </div>
 
-    <div class="panel">
-      <h2>Detalhamento do mês selecionado</h2>
-      <p class="desc">Clique numa categoria pra ver os lançamentos dela. Pra editar valores ou marcar como "realizado", vá na aba <strong>Orçamento</strong> — itens realizados ficam com risco e saem do total aqui.</p>
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-        <button class="btn-secondary" id="btnToggleEncerrado"></button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-        <div>
+      <div class="resumo-mes-2col">
+        <div class="resumo-mes-fluxo">
+          <div class="resumo-mes-fluxo-split">
+            <div class="bank-strip compact vertical">
+              <div class="bank-card"><span class="tag-dot" style="background:#8A05BE;"></span><span class="bc-name">Nubank</span><input type="text" inputmode="decimal" id="bNubank" class="input-moeda"></div>
+              <div class="bank-card dual">
+                <span class="tag-dot" style="background:#EC0000;"></span>
+                <div class="bc-name">Santander</div>
+                <div class="bc-dual-inputs">
+                  <input type="text" inputmode="decimal" id="bSantander" class="input-moeda" placeholder="Conta 1">
+                  <input type="text" inputmode="decimal" id="bSantander2" class="input-moeda" placeholder="Conta 2">
+                </div>
+              </div>
+              <div class="bank-card"><span class="tag-dot" style="background:#1B2A4A;"></span><span class="bc-name">XP</span><input type="text" inputmode="decimal" id="bXP" class="input-moeda"></div>
+              <div class="bank-card total"><span class="bc-name">Saldo inicial (bancos)</span><span id="bTotal">R$ 0,00</span></div>
+            </div>
+            <div class="saldo-cards compact" id="saldoCards"></div>
+          </div>
+        </div>
+
+        <div class="resumo-mes-detalhe">
           <div class="dash-cat-row" style="background:var(--green-bg);cursor:default;font-weight:800;">
             <span>ENTRADAS</span><span class="dash-val" id="detalheTotalEntradas"></span>
           </div>
           <div id="detalheEntradas"></div>
-        </div>
-        <div>
-          <div class="dash-cat-row" style="background:var(--red-bg);cursor:default;font-weight:800;">
+          <div class="dash-cat-row" style="background:var(--red-bg);cursor:default;font-weight:800;margin-top:14px;">
             <span>SAÍDAS</span><span class="dash-val" id="detalheTotalSaidas"></span>
           </div>
           <div id="detalheSaidas"></div>
         </div>
+      </div>
+
+      <div style="text-align:right;margin-top:16px;">
+        <button class="btn-secondary" id="btnToggleEncerrado"></button>
       </div>
     </div>
 
@@ -1449,7 +1481,7 @@ window._recarregarLancamentosDoStorage = async ()=>{
 };
 
 let lancamentos = [];
-let bancoSaldos = { Nubank:0, Santander:0, XP:0 };
+let bancoSaldos = { Nubank:0, Santander:0, Santander2:0, XP:0 };
 let investimentos = [];
 let indices = { CDI:10.5, SELIC:10.5, IPCA:4.5 };
 let categoriasConfig = ['Recebimentos','Despesas Fixas','Carros','Bancos (Aportes)','02.6 Cartão de Crédito','Moradia','Lazer','Saúde','Educação','Outros'];
@@ -1494,9 +1526,11 @@ async function loadAll(){
 
   document.getElementById('bNubank').value = fmtTexto(bancoSaldos.Nubank || 0);
   document.getElementById('bSantander').value = fmtTexto(bancoSaldos.Santander || 0);
+  document.getElementById('bSantander2').value = fmtTexto(bancoSaldos.Santander2 || 0);
   document.getElementById('bXP').value = fmtTexto(bancoSaldos.XP || 0);
   aplicarCorValor(document.getElementById('bNubank'), bancoSaldos.Nubank || 0);
   aplicarCorValor(document.getElementById('bSantander'), bancoSaldos.Santander || 0);
+  aplicarCorValor(document.getElementById('bSantander2'), bancoSaldos.Santander2 || 0);
   aplicarCorValor(document.getElementById('bXP'), bancoSaldos.XP || 0);
   document.getElementById('idxCDI').value = indices.CDI;
   document.getElementById('idxSELIC').value = indices.SELIC;
@@ -2064,11 +2098,11 @@ function aplicarCorValor(el, valor){
   el.style.color = valor < 0 ? 'var(--red)' : '';
   el.style.fontWeight = valor < 0 ? '800' : '700';
 }
-['bNubank','bSantander','bXP'].forEach(id=>{
+['bNubank','bSantander','bSantander2','bXP'].forEach(id=>{
   const el = document.getElementById(id);
   el.addEventListener('focus', ()=>{ el.value = el.value ? parseMoedaInput(el.value) : ''; }); // mostra número puro pra editar
   el.addEventListener('blur', async (e)=>{
-    const map = {bNubank:'Nubank', bSantander:'Santander', bXP:'XP'};
+    const map = {bNubank:'Nubank', bSantander:'Santander', bSantander2:'Santander2', bXP:'XP'};
     const valor = parseMoedaInput(e.target.value);
     bancoSaldos[map[id]] = valor;
     e.target.value = fmtTexto(valor);
@@ -2160,9 +2194,10 @@ function renderDetalheMes(){
   btnEnc.style.background = encerrado ? 'var(--ink)' : '';
   btnEnc.style.color = encerrado ? 'var(--paper)' : '';
 
-  // agrupa os lançamentos desse mês: tipo -> categoria -> [itens]
+  // agrupa os lançamentos desse mês: tipo -> categoria -> [itens] -- itens já "realizados" nem
+  // entram aqui, pra deixar a tela mais enxuta (eles já estão refletidos no saldo em bancos).
   const struct = { entrada:{}, saida:{} };
-  lancamentos.filter(l=>l.data.slice(0,7)===mk).forEach(l=>{
+  lancamentos.filter(l=>l.data.slice(0,7)===mk && !l.pago).forEach(l=>{
     const cat = l.categoria && l.categoria.trim() ? l.categoria.trim() : 'Outros';
     struct[l.tipo][cat] = struct[l.tipo][cat] || [];
     struct[l.tipo][cat].push(l);
@@ -2174,12 +2209,12 @@ function renderDetalheMes(){
     let totalTipo = 0;
     const corpoHtml = nomesCats.map(cat=>{
       const itens = categorias[cat];
-      const totalCat = itens.reduce((s,l)=> s + (l.pago?0:Number(l.valor)), 0);
+      const totalCat = itens.reduce((s,l)=> s + Number(l.valor), 0);
       totalTipo += totalCat;
       const catId = 'det_'+tipo+'_'+cat.replace(/[^a-zA-Z0-9]/g,'_');
       const aberta = categoriasAbertasFluxo.has(catId);
       const itensHtml = itens.sort((a,b)=>b.data.localeCompare(a.data)).map(l=>`
-        <div class="item-lanc${l.pago?' realizado-cell':''}">
+        <div class="item-lanc">
           <span class="il-desc">${l.desc}</span>
           <span class="il-val">${fmt(l.valor)}</span>
         </div>`).join('');
