@@ -3811,11 +3811,15 @@ function renderRelatorioInvestimentos(){
     return { inv: { nome: p.ticker, modo: 'acao_carteira' }, porMes: new Array(133).fill(p.valorAtual), variavel: true };
   }));
 
-  // ---- tabela mensal: coluna HOJE (saldo real) + 12 colunas de fim de mês projetado ----
+  // ---- tabela mensal: coluna HOJE (saldo real) + colunas de fim de mês projetado, até
+  // dezembro do ano que vem (mesmo horizonte usado no Fluxo de Caixa e no Orçamento) ----
   // labelsMensal[0] = "HOJE" → porMes[0] (saldo atual do dia)
   // labelsMensal[1] = "JUL/26" → porMes[1] (saldo projetado em 31/Jul) etc.
+  const hojeIdxAbsProjecao = hoje.getFullYear()*12 + hoje.getMonth();
+  const fimIdxAbsProjecao = (hoje.getFullYear()+1)*12 + 11; // dezembro do ano que vem
+  const numMesesProjecaoMensal = fimIdxAbsProjecao - hojeIdxAbsProjecao + 1;
   const labelsMensal = ['HOJE'];
-  for(let i=1;i<=12;i++){
+  for(let i=1;i<=numMesesProjecaoMensal;i++){
     const d = new Date(hoje.getFullYear(), hoje.getMonth()+i-1, 1);
     labelsMensal.push(MESES[d.getMonth()].slice(0,3).toUpperCase()+'/'+String(d.getFullYear()).slice(2));
   }
@@ -3855,10 +3859,10 @@ function renderRelatorioInvestimentos(){
 
   let headM, bodyM;
   {
-    const totalPorMes = new Array(13).fill(0);
+    const totalPorMes = new Array(labelsMensal.length).fill(0);
     const linhas = projecoes.map(p=>{
       const tagVariavel = p.variavel ? ' <span style="font-size:10px;color:var(--ink-soft);">(valor atual, sem projeção de taxa)</span>' : '';
-      const valores = p.porMes.slice(0,13);
+      const valores = p.porMes.slice(0, labelsMensal.length);
       valores.forEach((v,i)=>{ if(v!==null) totalPorMes[i]+=v; });
       return { nome: p.inv.nome+tagVariavel, valores };
     });
