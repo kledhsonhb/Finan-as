@@ -1174,17 +1174,14 @@
       <h2>Lançamento manual</h2>
       <p class="desc">Use quando o banco não disponibiliza fatura em CSV/OFX (ex: Santander). Lança um gasto por vez, já projetando parcelas futuras se houver.</p>
       <div style="margin-bottom:14px;padding:12px 14px;background:var(--paper-2);border-radius:8px;">
-        <label>Tipo (cadastro obrigatório)</label>
+        <label>Tipo de Cartão</label>
         <select id="manCartao" style="max-width:340px;">
           <option value="">— selecione o Tipo cadastrado —</option>
         </select>
-        <p class="desc" style="margin-top:6px;margin-bottom:0;">Selecione um Tipo cadastrado em Configurações. O Cartão é preenchido automaticamente e não pode ser digitado livre.</p>
+        <p class="desc" style="margin-top:6px;margin-bottom:0;">Cadastre novos Tipos em Configurações → Cartão de Crédito.</p>
       </div>
       <div class="form-grid">
-        <div>
-          <label>Cartão</label>
-          <select id="manBanco" disabled></select>
-        </div>
+        <select id="manBanco" disabled style="display:none;"></select>
         <div class="full" style="grid-column:1/-1;">
           <label>Descrição</label>
           <input type="text" id="manDesc" placeholder="Ex: Supermercado, Farmácia...">
@@ -3350,7 +3347,7 @@ function renderPainelPorTipo(mSel, projecoes, labelsMensal){
     const anoMesAtual = new Date().toISOString().slice(0,7);
 
     investimentos.forEach(inv=>{
-      if(inv.modo==='dolar') return; // dólar tratado abaixo, pela cotação
+      if(inv.modo==='dolar' || inv.modo==='acao') return; // tratados abaixo, cada um com sua lógica
       const ini = saldoInicioMesInvestimento(inv);
       if(ini===null) return;
       const hojeVal = saldoAtualInvestimento(inv);
@@ -3366,6 +3363,16 @@ function renderPainelPorTipo(mSel, projecoes, labelsMensal){
         addGanho(getBancoGanho(inv), 0, ganhoUsd);
       });
     }
+
+    // ações (investimento individual, modo="acao"): sem preço de fechamento do início do mês
+    // salvo -- mostra só o que entrou de novo esse mês (compra inicial ou aporte extra), como
+    // já é feito pra "Ações (Minha Carteira)" logo abaixo.
+    investimentos.filter(i=>i.modo==='acao').forEach(inv=>{
+      const [iy,im] = (inv.dataInicial||'').split('-').map(Number);
+      const comecouEsteMs = iy && (iy*12+(im-1))===hojeIdx0;
+      const aporte = (comecouEsteMs ? (Number(inv.valorInicial)||0) : 0) + aporteExtraNoMesIdx(inv, hojeIdx0);
+      if(aporte) addGanho(getBancoGanho(inv), aporte, 0);
+    });
 
     // ações: sem preço de fechamento do início do mês salvo -- mostra só as compras feitas esse mês (aporte)
     carteiraAcoesDash.forEach(pos=>{
@@ -4035,6 +4042,23 @@ document.getElementById('btnAddCartao').addEventListener('click', async ()=>{
   inputId.value='';
   await saveCartoesConfig();
   renderConfigCartoes();
+
+  // mantém a lista de bancos/emissores do módulo Cartão em dia sozinha -- deriva o banco pela
+  // primeira palavra do Tipo cadastrado (ex: "Nubank Kleds" -> banco "Nubank"), sem precisar
+  // de um cadastro manual separado só pra isso.
+  try{
+    const raw = await storageGet('bancosCartaoFin');
+    let bancosCartao = raw ? JSON.parse(raw) : ['Nubank','Santander','XP','Outro'];
+    const candidatos = bancosCartao.slice().sort((a,b)=> b.length - a.length);
+    const jaTemPrefixo = candidatos.some(b=> nome === b || nome.startsWith(b + ' '));
+    if(!jaTemPrefixo){
+      const bancoDerivado = nome.split(' ')[0];
+      if(bancoDerivado && !bancosCartao.includes(bancoDerivado)){
+        bancosCartao.push(bancoDerivado);
+        await storageSet('bancosCartaoFin', JSON.stringify(bancosCartao));
+      }
+    }
+  }catch(e){ /* silencioso -- não é crítico */ }
 });
 
 loadAll();
@@ -4078,7 +4102,8 @@ function normalizarNomeAba(nome){
 }
 
 function listaAbasBanco(){
-  // fonte única e exclusiva: o que está cadastrado em Configurações (Cartão + Tipo).
+  // fonte única e exclusiva: os bancos/emissores cadastrados (não os Tipos de Cartão, que são
+  // mais específicos — "Nubank Kleds" continua sendo um lançamento dentro da aba "Nubank").
   const vistos = new Set();
   const abas = [];
   function add(nome){
@@ -4086,7 +4111,6 @@ function listaAbasBanco(){
     if(nome && !vistos.has(nome)){ vistos.add(nome); abas.push(nome); }
   }
   bancosCompartilhados.forEach(add);
-  cartoesCompartilhados.forEach(add);
   return abas;
 }
 
@@ -4204,10 +4228,15 @@ async function loadAll(){
     cartoesCompartilhados = cc ? JSON.parse(cc) : [];
   }catch(e){ cartoesCompartilhados = []; }
   try{
-    // mesma chave usada pelo módulo Planejamento Financeiro — cadastro de bancos único pros dois
-    const bc = await storageGet('bancosConfigFin');
+    // lista PRÓPRIA do módulo Cartão (bancos/instituições emissoras) — não é mais a mesma do
+    // "Tipo de Investimento" do Planejamento Financeiro, que virou coisa separada.
+    const bc = await storageGet('bancosCartaoFin');
     bancosCompartilhados = bc ? JSON.parse(bc) : [];
-  }catch(e){ bancosCompartilhados = []; }
+    if(!bancosCompartilhados.length){
+      bancosCompartilhados = ['Nubank','Santander','XP','Outro'];
+      await storageSet('bancosCartaoFin', JSON.stringify(bancosCompartilhados));
+    }
+  }catch(e){ bancosCompartilhados = ['Nubank','Santander','XP','Outro']; }
   try{
     const rc = await storageGet('regrasCategorizacaoFin');
     regrasCategorizacao = rc ? JSON.parse(rc) : [];
@@ -4286,7 +4315,7 @@ async function recarregarCartoesCompartilhados(){
     cartoesCompartilhados = cc ? JSON.parse(cc) : [];
   }catch(e){ /* mantém o que já tinha */ }
   try{
-    const bc = await storageGet('bancosConfigFin');
+    const bc = await storageGet('bancosCartaoFin');
     bancosCompartilhados = bc ? JSON.parse(bc) : [];
   }catch(e){ /* mantém o que já tinha */ }
 }
@@ -5033,7 +5062,7 @@ document.getElementById('btnConfirmImport').addEventListener('click', async ()=>
   const notaTipo = document.getElementById('importNote');
   if(!cartaoTipoOk()){
     notaTipo.style.display='block'; notaTipo.style.color='var(--red)';
-    notaTipo.textContent = 'Antes de importar, cadastre ao menos um Cartão e um Tipo em Configurações → Cartão de Crédito.';
+    notaTipo.textContent = 'Antes de importar, cadastre ao menos um Tipo de Cartão em Configurações → Cartão de Crédito.';
     return;
   }
   if(!document.getElementById('impCartaoCadastrado').value){
@@ -5132,7 +5161,7 @@ document.getElementById('btnConfirmImport').addEventListener('click', async ()=>
 
 /* ===================== CONFIGURAÇÕES — BANCOS (mesma base do módulo Planejamento Financeiro) ===================== */
 async function saveBancosCompartilhados(){
-  await storageSet('bancosConfigFin', JSON.stringify(bancosCompartilhados));
+  await storageSet('bancosCartaoFin', JSON.stringify(bancosCompartilhados));
 }
 function popularSelectsBancoCartao(){
   ['manBanco','impBancoPadrao','novoCartaoBancoSel'].forEach(id=>{
@@ -5306,7 +5335,7 @@ document.getElementById('btnAddManual').addEventListener('click', async ()=>{
   const nota = document.getElementById('manualNote');
   if(!cartaoTipoOk()){
     nota.style.display='block'; nota.style.color='var(--red)';
-    nota.textContent = 'Antes de lançar, cadastre ao menos um Cartão e um Tipo em Configurações → Cartão de Crédito.';
+    nota.textContent = 'Antes de lançar, cadastre ao menos um Tipo de Cartão em Configurações → Cartão de Crédito.';
     return;
   }
   if(!document.getElementById('manCartao').value){
