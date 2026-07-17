@@ -500,7 +500,7 @@
     </button>
     <button type="button" class="mega-tab" data-modulo="config">
       <span class="mn-titulo">⚙️ Configurações</span>
-      <span class="mn-sub">Ações, Bancos, Cartão de Crédito, Planejamento</span>
+      <span class="mn-sub">Ações, Tipo de Investimento, Cartão de Crédito, Planejamento</span>
     </button>
   </div>
 
@@ -543,15 +543,6 @@
           <select id="fCategoria"></select>
         </div>
         <div>
-          <label>Banco</label>
-          <select id="fBanco">
-            <option value="Nubank">Nubank</option>
-            <option value="Santander">Santander</option>
-            <option value="XP">XP</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-        <div>
           <label>Repetir por quantos meses</label>
           <input type="number" id="fRepetir" min="1" value="1" placeholder="1 = só este mês">
         </div>
@@ -575,7 +566,7 @@
       <div class="note" id="importPlanilhaNote" style="display:none;text-align:left;"></div>
 
       <div style="margin-top:14px;">
-        <label>Buscar (descrição, categoria, banco, tipo ou valor)</label>
+        <label>Buscar (descrição, categoria, tipo ou valor)</label>
         <input type="text" id="buscaLanc" placeholder="Digite algo pra filtrar a lista abaixo...">
       </div>
 
@@ -586,8 +577,6 @@
         <span id="bulkCountLanc">0 selecionado(s)</span>
         <select id="bulkCategoriaLanc"></select>
         <button class="btn-secondary" id="btnBulkAplicarCategoria">Aplicar categoria</button>
-        <select id="bulkBancoLanc"></select>
-        <button class="btn-secondary" id="btnBulkAplicarBanco">Aplicar banco</button>
         <select id="bulkTipoLanc">
           <option value="entrada">Entrada</option>
           <option value="saida">Saída</option>
@@ -610,7 +599,6 @@
             <th class="sortable" data-sort="data">Data</th>
             <th class="sortable" data-sort="desc">Descrição</th>
             <th class="sortable" data-sort="categoria">Categoria</th>
-            <th class="sortable" data-sort="banco">Banco</th>
             <th class="sortable" data-sort="tipo">Tipo</th>
             <th class="sortable num-th" data-sort="valor" style="text-align:right;">Valor</th>
             <th>Realizado</th>
@@ -689,7 +677,7 @@
           <input type="text" id="iNome" placeholder="Ex: Aplicação XP, Tesouro IPCA+...">
         </div>
         <div>
-          <label>Banco / corretora</label>
+          <label>Tipo de Investimento</label>
           <select id="iBanco"></select>
         </div>
         <div>
@@ -733,7 +721,7 @@
           <input type="text" id="dNome" placeholder="Ex: Reserva em dólar, Carteira USD viagem...">
         </div>
         <div>
-          <label>Banco / corretora</label>
+          <label>Tipo de Investimento</label>
           <select id="dBanco"></select>
         </div>
         <div>
@@ -843,7 +831,7 @@
   <div class="view active" id="view-relatorio-inv">
     <div class="panel">
       <h2>Visão geral — total investido</h2>
-      <p class="desc">Escolha um mês pra ver o valor aberto por banco, o ganho daquele mês (aporte x juros) e a comparação entre dois períodos — tudo num só lugar.</p>
+      <p class="desc">Escolha um mês pra ver o valor aberto por tipo de investimento, o ganho daquele mês (aporte x juros) e a comparação entre dois períodos — tudo num só lugar.</p>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:18px;">
         <div>
           <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);">Mês de referência</label>
@@ -857,11 +845,11 @@
 
       <div class="resumo-inv-grid">
         <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Valor aberto por banco</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Valor aberto por tipo de investimento</div>
           <div id="valorPorTipoWrap"></div>
         </div>
         <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Ganho do mês — aporte x juros, por tipo</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:8px;">Ganho do mês — aporte x juros, por tipo de investimento</div>
           <div id="ganhoMesWrap"></div>
         </div>
         <div>
@@ -1237,7 +1225,7 @@
 
   <div class="subtabs" id="cfgModSubtabs">
     <button type="button" class="subtab-btn" data-cfgsub="acoes"><span class="dot" style="background:#B9842E;"></span>Ações</button>
-    <button type="button" class="subtab-btn" data-cfgsub="bancos"><span class="dot" style="background:#1F7A4D;"></span>Bancos</button>
+    <button type="button" class="subtab-btn" data-cfgsub="bancos"><span class="dot" style="background:#1F7A4D;"></span>Tipo de Investimento</button>
     <button type="button" class="subtab-btn active" data-cfgsub="cartao"><span class="dot" style="background:#1B2A4A;"></span>Cartão de Crédito</button>
     <button type="button" class="subtab-btn" data-cfgsub="planejamento"><span class="dot" style="background:#D9651D;"></span>Planejamento Financeiro</button>
   </div>
@@ -1271,10 +1259,10 @@
 
   <div class="cfgsub" id="cfgsub-bancos">
     <div class="panel">
-      <h2>Bancos</h2>
-      <p class="desc">Crie novos bancos/corretoras ou renomeie os existentes — aparecem nos formulários de Orçamento (entradas/saídas), Investimentos e nos saldos do Fluxo de Caixa. Renomear atualiza tudo que já usa.</p>
+      <h2>Tipo de Investimento</h2>
+      <p class="desc">Crie novos tipos (bancos, corretoras, ou rótulos como "Dólar", "Previdência Privada") ou renomeie os existentes — usado só pra vincular investimentos, na aba Entrada Investimentos. Renomear atualiza todos os investimentos que já usam esse tipo.</p>
       <div class="form-grid" style="grid-template-columns:1fr auto;align-items:end;">
-        <div><label>Novo banco</label><input type="text" id="novoBancoInput" placeholder="Ex: Inter, BTG, C6..."></div>
+        <div><label>Novo tipo</label><input type="text" id="novoBancoInput" placeholder="Ex: Inter, BTG, C6..."></div>
         <button class="btn-secondary" id="btnAddBanco" style="height:38px;">Adicionar</button>
       </div>
       <div id="listaBancosConfig" style="margin-top:16px;"></div>
@@ -1282,24 +1270,11 @@
   </div>
 
   <div class="cfgsub active" id="cfgsub-cartao">
-    <div class="panel">
-      <h2>Cartão</h2>
-      <p class="desc">Cadastre a bandeira/instituição de cada cartão (ex: Nubank, XP, Santander, Mercado Pago). Esse cadastro é obrigatório antes de lançar manualmente ou importar uma fatura.</p>
+    <div class="panel" id="painelCartoesConfig">
+      <h2>Tipo de Cartão</h2>
+      <p class="desc">Cadastre livremente o nome de cada cartão (ex: "Nubank Kleds", "XP Sol", "Mercado Pago"). Esse cadastro é obrigatório antes de lançar manualmente ou importar uma fatura. O banco de cada um é reconhecido automaticamente pela primeira palavra do nome — cadastre os bancos em Configurações → Planejamento Financeiro → Bancos, se precisar de um novo.</p>
       <div class="form-grid" style="grid-template-columns:1fr auto;align-items:end;">
-        <div>
-          <label>Novo cartão</label>
-          <input type="text" id="novoBancoInputCartao" placeholder="Ex: Mercado Pago">
-        </div>
-        <button class="btn-secondary" id="btnAddBancoCartao" style="height:38px;">Adicionar</button>
-      </div>
-      <div id="listaBancosConfigCartao" style="margin-top:18px;"></div>
-    </div>
-    <div class="panel" id="painelCartoesConfig" style="margin-top:18px;">
-      <h2>Tipo</h2>
-      <p class="desc">Escolha o Cartão e dê uma identificação (ex: Kleds, Sol). O Tipo final fica "Nubank Kleds", por exemplo — sempre vinculado a um Cartão já cadastrado, sem digitação livre. Esse cadastro é obrigatório antes de lançar manualmente ou importar uma fatura.</p>
-      <div class="form-grid" style="grid-template-columns:1fr 1fr auto;align-items:end;">
-        <div><label>Cartão</label><select id="novoCartaoBancoSel"></select></div>
-        <div><label>Identificação</label><input type="text" id="novoCartaoInput" placeholder="Ex: Kleds, Sol..."></div>
+        <div><label>Tipo de cartão</label><input type="text" id="novoCartaoInput" placeholder="Ex: Nubank Kleds"></div>
         <button class="btn-secondary" id="btnAddCartao" style="height:38px;">Adicionar</button>
       </div>
       <div id="listaCartoesConfig" style="margin-top:16px;"></div>
@@ -1666,7 +1641,6 @@ document.getElementById('btnAddLanc').addEventListener('click', async ()=>{
   const valor = parseFloat(document.getElementById('fValor').value);
   const dataBase = document.getElementById('fData').value || new Date().toISOString().slice(0,10);
   const categoria = document.getElementById('fCategoria').value.trim();
-  const banco = document.getElementById('fBanco').value;
   const repetirMeses = Math.max(1, parseInt(document.getElementById('fRepetir').value) || 1);
   const elDesc = document.getElementById('fDesc'), elValor = document.getElementById('fValor');
   elDesc.style.borderColor = ''; elValor.style.borderColor = '';
@@ -1688,7 +1662,7 @@ document.getElementById('btnAddLanc').addEventListener('click', async ()=>{
     lancamentos.push({
       id: 'l_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
       data: dt.toISOString().slice(0,10),
-      desc, categoria, banco, tipo: tipoAtual, valor: intercalado ? valoresPorMes[i] : valor,
+      desc, categoria, tipo: tipoAtual, valor: intercalado ? valoresPorMes[i] : valor,
       lote: loteId
     });
   }
@@ -1744,7 +1718,6 @@ function renderLancamentos(){
       const valorTxt = fmtNumero(l.valor).toLowerCase();
       return (l.desc||'').toLowerCase().includes(termo)
         || (l.categoria||'').toLowerCase().includes(termo)
-        || (l.banco||'').toLowerCase().includes(termo)
         || tipoTxt.includes(termo)
         || valorTxt.includes(termo);
     });
@@ -1792,7 +1765,6 @@ function atualizarBulkBarLanc(){
   bar.style.display = lancamentosSelecionados.size ? 'flex' : 'none';
   document.getElementById('bulkCountLanc').textContent = `${lancamentosSelecionados.size} selecionado(s)`;
   document.getElementById('bulkCategoriaLanc').innerHTML = getAllCategorias().map(c=>`<option value="${c}">${c}</option>`).join('');
-  document.getElementById('bulkBancoLanc').innerHTML = bancosConfig.map(b=>`<option value="${b}">${b}</option>`).join('');
   document.getElementById('checkAllLanc').checked = document.querySelectorAll('.chk-lanc').length>0 &&
     [...document.querySelectorAll('.chk-lanc')].every(c=>c.checked);
 }
@@ -1807,11 +1779,6 @@ document.getElementById('btnBulkLimpar').addEventListener('click', ()=>{ lancame
 document.getElementById('btnBulkAplicarCategoria').addEventListener('click', async ()=>{
   const novaCat = document.getElementById('bulkCategoriaLanc').value;
   lancamentos.forEach(l=>{ if(lancamentosSelecionados.has(l.id)) l.categoria = novaCat; });
-  await saveLancamentos(); renderLancamentos(); renderDashboard();
-});
-document.getElementById('btnBulkAplicarBanco').addEventListener('click', async ()=>{
-  const novoBanco = document.getElementById('bulkBancoLanc').value;
-  lancamentos.forEach(l=>{ if(lancamentosSelecionados.has(l.id)) l.banco = novoBanco; });
   await saveLancamentos(); renderLancamentos(); renderDashboard();
 });
 document.getElementById('btnBulkAplicarTipo').addEventListener('click', async ()=>{
@@ -1865,7 +1832,7 @@ function montarLinhaLancVisualizacao(tr, l){
     <td>${sync ? `<span title="${tituloOrigem}" style="opacity:.55;">🔒</span>` : `<input type="checkbox" class="chk-lanc" data-id="${l.id}" ${lancamentosSelecionados.has(l.id)?'checked':''}>`}</td>
     <td>${dataFmt}</td>
     <td>${l.desc}${sync?` <span class="parcela-tag" title="${tituloOrigem}">🔄 auto</span>`:''}</td>
-    <td>${l.categoria||'—'}</td><td>${l.banco}</td>
+    <td>${l.categoria||'—'}</td>
     <td><span class="chip ${l.tipo}">${l.tipo==='entrada'?'Entrada':'Saída'}</span></td>
     <td class="num" style="color:${l.tipo==='entrada'?'var(--green)':'var(--red)'}">${l.tipo==='entrada'?'+':'-'} ${fmt(l.valor)}</td>
     <td style="text-align:center;"><input type="checkbox" class="chk-realizado" data-id="${l.id}" ${l.pago?'checked':''} title="Marcar como realizado — some do Fluxo de Caixa"></td>
@@ -1904,11 +1871,6 @@ function montarLinhaLancEdicao(tr, l){
     <td><input type="text" value="${l.desc}" class="ed-desc"></td>
     <td><select class="ed-categoria">${getAllCategorias().map(c=>`<option value="${c}" ${c===l.categoria?'selected':''}>${c}</option>`).join('')}</select></td>
     <td>
-      <select class="ed-banco">
-        ${bancosConfig.map(b=>`<option value="${b}" ${b===l.banco?'selected':''}>${b}</option>`).join('')}
-      </select>
-    </td>
-    <td>
       <select class="ed-tipo">
         <option value="entrada" ${l.tipo==='entrada'?'selected':''}>Entrada</option>
         <option value="saida" ${l.tipo==='saida'?'selected':''}>Saída</option>
@@ -1929,7 +1891,7 @@ function montarLinhaLancEdicao(tr, l){
   const trLote = document.createElement('tr');
   trLote.className = 'lanc-lote-controls';
   trLote.innerHTML = l.lote
-    ? `<td colspan="9" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
+    ? `<td colspan="8" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
         <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;">
           <span style="color:var(--ink-soft);">📋 Faz parte de uma série com <strong>${serieAtual.length}</strong> parcela(s).</span>
           <label style="display:flex;align-items:center;gap:6px;">
@@ -1938,11 +1900,11 @@ function montarLinhaLancEdicao(tr, l){
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" class="ed-lote-aplicar-frente" style="width:auto;min-height:auto;">
-            Aplicar descrição/valor/categoria/banco/tipo deste mês em diante também
+            Aplicar descrição/valor/categoria/tipo deste mês em diante também
           </label>
         </div>
       </td>`
-    : `<td colspan="9" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
+    : `<td colspan="8" style="background:rgba(0,0,0,0.03);padding:10px 14px;border-top:1px dashed var(--line);">
         <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;">
           <span style="color:var(--ink-soft);">📅 Lançamento avulso (sem série ainda).</span>
           <label style="display:flex;align-items:center;gap:6px;">
@@ -1960,7 +1922,6 @@ function montarLinhaLancEdicao(tr, l){
     const novaData = tr.querySelector('.ed-data').value || l.data;
     const novoDesc = tr.querySelector('.ed-desc').value.trim() || l.desc;
     const novaCategoria = tr.querySelector('.ed-categoria').value;
-    const novoBanco = tr.querySelector('.ed-banco').value;
     const novoTipo = tr.querySelector('.ed-tipo').value;
     const novoValor = parseFloat(tr.querySelector('.ed-valor').value) || l.valor;
     const novoPago = tr.querySelector('.ed-realizado').checked;
@@ -1970,10 +1931,10 @@ function montarLinhaLancEdicao(tr, l){
       const novoTotal = Math.max(1, parseInt(trLote.querySelector('.ed-lote-total').value) || 1);
 
       l.data = novaData; l.pago = novoPago;
-      l.desc = novoDesc; l.categoria = novaCategoria; l.banco = novoBanco; l.tipo = novoTipo; l.valor = novoValor;
+      l.desc = novoDesc; l.categoria = novaCategoria; l.tipo = novoTipo; l.valor = novoValor;
       if(aplicarFrente){
         lancamentos.filter(x=>x.lote===l.lote && x.id!==l.id && x.data >= l.data).forEach(x=>{
-          x.desc = novoDesc; x.categoria = novaCategoria; x.banco = novoBanco; x.tipo = novoTipo; x.valor = novoValor;
+          x.desc = novoDesc; x.categoria = novaCategoria; x.tipo = novoTipo; x.valor = novoValor;
         });
       }
 
@@ -1987,7 +1948,7 @@ function montarLinhaLancEdicao(tr, l){
           lancamentos.push({
             id: 'l_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
             data: dt.toISOString().slice(0,10),
-            desc: ultimo.desc, categoria: ultimo.categoria, banco: ultimo.banco, tipo: ultimo.tipo, valor: ultimo.valor,
+            desc: ultimo.desc, categoria: ultimo.categoria, tipo: ultimo.tipo, valor: ultimo.valor,
             lote: l.lote
           });
         }
@@ -1996,7 +1957,7 @@ function montarLinhaLancEdicao(tr, l){
         lancamentos = lancamentos.filter(x=> !idsRemover.has(x.id));
       }
     }else{
-      l.data = novaData; l.desc = novoDesc; l.categoria = novaCategoria; l.banco = novoBanco; l.tipo = novoTipo; l.valor = novoValor; l.pago = novoPago;
+      l.data = novaData; l.desc = novoDesc; l.categoria = novaCategoria; l.tipo = novoTipo; l.valor = novoValor; l.pago = novoPago;
 
       // prorrogar: se pediu pra repetir por mais meses, vira uma série a partir de agora
       const meses = Math.max(0, parseInt(trLote.querySelector('.ed-prorrogar-meses').value) || 0);
@@ -2009,7 +1970,7 @@ function montarLinhaLancEdicao(tr, l){
           lancamentos.push({
             id: 'l_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+i,
             data: dt.toISOString().slice(0,10),
-            desc: l.desc, categoria: l.categoria, banco: l.banco, tipo: l.tipo, valor: l.valor,
+            desc: l.desc, categoria: l.categoria, tipo: l.tipo, valor: l.valor,
             lote: loteId
           });
         }
@@ -3034,7 +2995,7 @@ function renderInvestimentos(){
         formDiv.innerHTML = `
           <div class="form-grid">
             <div><label>Nome</label><input type="text" class="ei-nome" value="${inv.nome}"></div>
-            <div><label>Banco</label><select class="ei-banco">${bancosConfig.map(b2=>`<option value="${b2}" ${b2===inv.banco?'selected':''}>${b2}</option>`).join('')}</select></div>
+            <div><label>Tipo de Investimento</label><select class="ei-banco">${bancosConfig.map(b2=>`<option value="${b2}" ${b2===inv.banco?'selected':''}>${b2}</option>`).join('')}</select></div>
             <div><label>Quantidade em USD</label><input type="number" step="0.01" class="ei-qtd-usd" value="${inv.quantidadeMoeda}"></div>
             <div><label>💰 Saldo atual hoje (R$) — atualizar com o valor real do banco</label><input type="number" step="0.01" class="ei-saldo-manual" value="${inv.saldoManualHoje||''}" placeholder="Deixe vazio pra usar cálculo automático"></div>
             <div><label>Data desse saldo</label><input type="date" class="ei-data-saldo-manual" value="${inv.dataSaldoManual||new Date().toISOString().slice(0,10)}"></div>
@@ -3055,7 +3016,7 @@ function renderInvestimentos(){
         formDiv.innerHTML = `
           <div class="form-grid">
             <div><label>Ticker</label><input type="text" class="ei-ticker" value="${inv.ticker}"></div>
-            <div><label>Banco</label><select class="ei-banco">${bancosConfig.map(b2=>`<option value="${b2}" ${b2===inv.banco?'selected':''}>${b2}</option>`).join('')}</select></div>
+            <div><label>Tipo de Investimento</label><select class="ei-banco">${bancosConfig.map(b2=>`<option value="${b2}" ${b2===inv.banco?'selected':''}>${b2}</option>`).join('')}</select></div>
             <div><label>Quantidade</label><input type="number" step="1" class="ei-qtd-acao" value="${inv.quantidadeAcoes}"></div>
             <div><label>Preço médio de compra (R$)</label><input type="number" step="0.01" class="ei-preco-compra" value="${inv.precoCompra}"></div>
             <div><label>Cotação atual manual (R$)</label><input type="number" step="0.01" class="ei-cotacao-manual" value="${inv.cotacaoManual||''}" placeholder="Se a busca automática não achar"></div>
@@ -3112,7 +3073,7 @@ function renderInvestimentos(){
         formDiv.innerHTML = `
           <div class="form-grid">
             <div><label>Nome</label><input type="text" class="ei-nome" value="${inv.nome}"></div>
-            <div><label>Banco</label>
+            <div><label>Tipo de Investimento</label>
               <select class="ei-banco">${bancosConfig.map(b2=>`<option value="${b2}" ${b2===inv.banco?'selected':''}>${b2}</option>`).join('')}</select>
             </div>
             <div><label>Tipo de rendimento</label>
@@ -3373,9 +3334,15 @@ function renderPainelPorTipo(mSel, projecoes, labelsMensal){
     </div>`;
   }).join('') || '<p style="color:var(--ink-soft);font-size:13px;">Sem dados pra este mês.</p>';
 
-  // ---- ganho do mês, por tipo, separado em aporte x juros ----
-  const ganhoPorTipo = {};
-  ORDEM_TIPOS_INV.forEach(t=> ganhoPorTipo[t] = {aporte:0, juros:0, temDado:false});
+  // ---- ganho do mês, por banco, separado em aporte x juros ----
+  const getBancoGanho = (inv) => (inv.banco||'').trim() || 'Outro';
+  const ganhoPorBanco = {};
+  const addGanho = (banco, aporte, juros) => {
+    ganhoPorBanco[banco] = ganhoPorBanco[banco] || {aporte:0, juros:0, temDado:false};
+    ganhoPorBanco[banco].aporte += aporte;
+    ganhoPorBanco[banco].juros += juros;
+    ganhoPorBanco[banco].temDado = true;
+  };
 
   if(mSel === 0){
     // mês corrente ainda não fechou -- usa dado real: saldo no início do mês → saldo de hoje
@@ -3383,71 +3350,86 @@ function renderPainelPorTipo(mSel, projecoes, labelsMensal){
     const anoMesAtual = new Date().toISOString().slice(0,7);
 
     investimentos.forEach(inv=>{
+      if(inv.modo==='dolar') return; // dólar tratado abaixo, pela cotação
       const ini = saldoInicioMesInvestimento(inv);
-      if(ini===null) return; // não cobre dólar (tratado abaixo)
+      if(ini===null) return;
       const hojeVal = saldoAtualInvestimento(inv);
       const extra = aporteExtraNoMesIdx(inv, hojeIdx0);
-      const tipo = tipoAgrupadoInvestimento(inv);
-      ganhoPorTipo[tipo].aporte += extra;
-      ganhoPorTipo[tipo].juros += (hojeVal - ini - extra);
-      ganhoPorTipo[tipo].temDado = true;
+      addGanho(getBancoGanho(inv), extra, hojeVal - ini - extra);
     });
 
     if(cotacaoUSD.valor && cotacaoUSDInicioMes.valor){
-      const qtdUsd = investimentos.filter(i=>i.modo==='dolar').reduce((s,i)=>s+(Number(i.quantidadeMoeda)||0),0);
-      if(qtdUsd){
-        const ganhoUsd = qtdUsd*cotacaoUSD.valor - qtdUsd*cotacaoUSDInicioMes.valor;
-        ganhoPorTipo['Dólar'].juros += ganhoUsd;
-        ganhoPorTipo['Dólar'].temDado = true;
-      }
+      investimentos.filter(i=>i.modo==='dolar').forEach(inv=>{
+        const qtd = Number(inv.quantidadeMoeda)||0;
+        if(!qtd) return;
+        const ganhoUsd = qtd*cotacaoUSD.valor - qtd*cotacaoUSDInicioMes.valor;
+        addGanho(getBancoGanho(inv), 0, ganhoUsd);
+      });
     }
 
     // ações: sem preço de fechamento do início do mês salvo -- mostra só as compras feitas esse mês (aporte)
     carteiraAcoesDash.forEach(pos=>{
       (pos.compras||[]).forEach(c=>{
         if((c.data||'').slice(0,7) === anoMesAtual){
-          ganhoPorTipo['Ações'].aporte += (Number(c.qty)||0)*(Number(c.preco)||0);
-          ganhoPorTipo['Ações'].temDado = true;
+          addGanho('Outro', (Number(c.qty)||0)*(Number(c.preco)||0), 0);
         }
       });
     });
   }else{
-    // meses projetados: compara mSel-1 → mSel (mesma lógica de "Resultado Períodos", quebrada por tipo)
+    // meses projetados: compara mSel-1 → mSel (mesma lógica de "Resultado Períodos", quebrada por banco)
     const hojeRef = new Date(); hojeRef.setDate(1);
     const hojeIdxRef = hojeRef.getFullYear()*12 + hojeRef.getMonth();
     projecoes.forEach(p=>{
       if(p.variavel) return; // dólar/ações: sem projeção de taxa -- fica achatado, sem "ganho" projetado
-      const tipo = tipoAgrupadoInvestimento(p.inv);
+      const banco = getBancoGanho(p.inv);
       const atual = p.porMes[mSel];
       const anterior = p.porMes[mSel-1];
       if(atual===null || atual===undefined) return;
       const extra = aporteExtraNoMesIdx(p.inv, hojeIdxRef+mSel);
-      ganhoPorTipo[tipo].temDado = true;
       if(anterior===null || anterior===undefined){
-        ganhoPorTipo[tipo].aporte += (Number(p.inv.valorInicial)||0) + extra;
+        addGanho(banco, (Number(p.inv.valorInicial)||0) + extra, 0);
       }else{
         const aporteMes = aporteMensalNoMesIdx(p.inv, hojeIdxRef+mSel) + extra;
-        ganhoPorTipo[tipo].aporte += aporteMes;
-        ganhoPorTipo[tipo].juros += (atual - anterior - aporteMes);
+        addGanho(banco, aporteMes, atual - anterior - aporteMes);
       }
     });
   }
 
-  const linhasGanho = ORDEM_TIPOS_INV.map(t=>{
-    const g = ganhoPorTipo[t];
-    if(!g.temDado) return '';
+  const bancosGanhoOrdenados = Object.keys(ganhoPorBanco).filter(b=>ganhoPorBanco[b].temDado)
+    .sort((a,b)=> (ganhoPorBanco[b].aporte+ganhoPorBanco[b].juros) - (ganhoPorBanco[a].aporte+ganhoPorBanco[a].juros));
+
+  // resumo total do mês (soma de todos os bancos), pra ver de cara o quanto cresceu no total
+  const totalAporte = bancosGanhoOrdenados.reduce((s,b)=> s+ganhoPorBanco[b].aporte, 0);
+  const totalJuros = bancosGanhoOrdenados.reduce((s,b)=> s+ganhoPorBanco[b].juros, 0);
+  const totalGeralMes = totalAporte + totalJuros;
+  const corTotalGeral = totalGeralMes>0 ? 'var(--green)' : (totalGeralMes<0 ? 'var(--red)' : 'var(--ink-soft)');
+  const corJurosGeral = totalJuros>0 ? 'var(--green)' : (totalJuros<0 ? 'var(--red)' : 'var(--ink-soft)');
+  const resumoTotalHtml = bancosGanhoOrdenados.length ? `
+    <div style="padding:10px 0 12px;border-bottom:2px solid var(--ink);margin-bottom:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><strong style="font-size:14px;">Total do mês</strong><strong style="color:${corTotalGeral};font-size:15px;">${totalGeralMes>=0?'+':''}${fmt(totalGeralMes)}</strong></div>
+      <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--ink-soft);margin-top:3px;">
+        <span>Aporte: ${fmt(totalAporte)}</span>
+        <span style="color:${corJurosGeral};">Juros/valorização: ${totalJuros>=0?'+':''}${fmt(totalJuros)}</span>
+      </div>
+    </div>` : '';
+
+  const linhasGanho = bancosGanhoOrdenados.map(banco=>{
+    const g = ganhoPorBanco[banco];
     const total = g.aporte + g.juros;
     const corTotal = total>0 ? 'var(--green)' : (total<0 ? 'var(--red)' : 'var(--ink-soft)');
     const corJuros = g.juros>0 ? 'var(--green)' : (g.juros<0 ? 'var(--red)' : 'var(--ink-soft)');
     return `<div style="padding:9px 0;border-bottom:1px solid var(--line);">
-      <div style="display:flex;justify-content:space-between;align-items:center;"><strong>${t}</strong><strong style="color:${corTotal};">${total>=0?'+':''}${fmt(total)}</strong></div>
-      <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--ink-soft);margin-top:3px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="display:flex;align-items:center;gap:7px;"><span class="bank-logo" style="width:19px;height:19px;font-size:10px;border-radius:5px;background:${corBancoInv(banco)};">${banco.charAt(0).toUpperCase()}</span><strong style="font-size:13.5px;">${banco.charAt(0).toUpperCase()+banco.slice(1).toLowerCase()}</strong></span>
+        <strong style="color:${corTotal};">${total>=0?'+':''}${fmt(total)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--ink-soft);margin-top:3px;padding-left:26px;">
         <span>Aporte: ${fmt(g.aporte)}</span>
         <span style="color:${corJuros};">Juros/valorização: ${g.juros>=0?'+':''}${fmt(g.juros)}</span>
       </div>
     </div>`;
-  }).filter(Boolean).join('');
-  wrapGanho.innerHTML = linhasGanho || '<p style="color:var(--ink-soft);font-size:13px;">Sem movimentação nesse mês.</p>';
+  }).join('');
+  wrapGanho.innerHTML = resumoTotalHtml + (linhasGanho || '<p style="color:var(--ink-soft);font-size:13px;">Sem movimentação nesse mês.</p>');
 
   if(mSel===0 && carteiraAcoesDash.length){
     wrapGanho.insertAdjacentHTML('beforeend',
@@ -3963,10 +3945,10 @@ function renderConfigBancos(){
   const cont = document.getElementById('listaBancosConfig');
   if(!cont) return;
   cont.innerHTML = bancosConfig.map(b=>{
-    const count = lancamentos.filter(l=>l.banco===b).length + investimentos.filter(i=>i.banco===b).length;
+    const count = investimentos.filter(i=>i.banco===b).length;
     return `<div class="cfg-row" data-original="${b.replace(/"/g,'&quot;')}">
       <input type="text" value="${b}" class="cfg-rename-banco">
-      <span class="cfg-count">${count} uso(s)</span>
+      <span class="cfg-count">${count} investimento(s)</span>
       <button class="btn-secondary cfg-save-banco">Salvar</button>
       <button class="del-btn cfg-del-banco">✕</button>
     </div>`;
@@ -3980,12 +3962,10 @@ function renderConfigBancos(){
       if(!novo || novo===original) return;
       bancosConfig = bancosConfig.map(b=>b===original?novo:b);
       if(!bancosConfig.includes(novo)) bancosConfig.push(novo);
-      lancamentos.forEach(l=>{ if(l.banco===original) l.banco=novo; });
       investimentos.forEach(i=>{ if(i.banco===original) i.banco=novo; });
-      if(bancoSaldos[original]!==undefined){ bancoSaldos[novo]=bancoSaldos[original]; delete bancoSaldos[original]; }
-      await saveBancosConfig(); await saveLancamentos(); await saveInvestimentos(); await saveBancos();
+      await saveBancosConfig(); await saveInvestimentos();
       popularSelectsBanco();
-      renderConfigBancos(); renderLancamentos(); renderDashboard(); renderInvestimentos();
+      renderConfigBancos(); renderDashboard(); renderInvestimentos();
     });
   });
   cont.querySelectorAll('.cfg-del-banco').forEach(btn=>{
@@ -4048,12 +4028,9 @@ function renderConfigCartoes(){
   });
 }
 document.getElementById('btnAddCartao').addEventListener('click', async ()=>{
-  const banco = document.getElementById('novoCartaoBancoSel').value;
   const inputId = document.getElementById('novoCartaoInput');
-  const ident = inputId.value.trim();
-  if(!banco){ alert('Cadastre um Cartão antes de criar um Tipo.'); return; }
-  if(!ident) return;
-  const nome = (banco + ' ' + ident).trim();
+  const nome = inputId.value.trim();
+  if(!nome) return;
   if(!cartoesConfig.includes(nome)) cartoesConfig.push(nome);
   inputId.value='';
   await saveCartoesConfig();
@@ -5204,16 +5181,6 @@ function renderConfigBancosCartao(){
     });
   });
 }
-document.getElementById('btnAddBancoCartao').addEventListener('click', async ()=>{
-  const input = document.getElementById('novoBancoInputCartao');
-  const nome = input.value.trim();
-  if(!nome) return;
-  if(!bancosCompartilhados.includes(nome)) bancosCompartilhados.push(nome);
-  input.value = '';
-  await saveBancosCompartilhados();
-  popularSelectsBancoCartao(); renderConfigBancosCartao();
-  renderSubtabsBanco(); renderBancoView();
-});
 
 /* ===================== CONFIGURAÇÕES — CATEGORIAS ===================== */
 function renderConfig(){
