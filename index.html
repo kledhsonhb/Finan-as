@@ -317,19 +317,19 @@
   .saldo-cards.compact .saldo-card .sc-val{ font-size:16px; }
   .saldo-cards.compact .saldo-card .sc-lbl{ font-size:9.5px; }
 
-  /* Resumo do mês: saldo de bancos + fluxo do lado esquerdo (dividido ao meio), entradas/saídas detalhadas à direita */
-  .resumo-mes-2col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
-  .resumo-mes-fluxo{ position:sticky; top:12px; }
-  .resumo-mes-fluxo-split{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  .resumo-mes-fluxo-split .bank-strip.compact.vertical{ flex-direction:column; }
-  .resumo-mes-fluxo-split .saldo-cards.compact{ grid-template-columns:1fr; }
-  @media (max-width:900px){
-    .resumo-mes-2col{ grid-template-columns:1fr; gap:20px; }
-    .resumo-mes-fluxo{ position:static; order:-1; }
-  }
-  @media (max-width:560px){
-    .resumo-mes-fluxo-split{ grid-template-columns:1fr; }
-  }
+  /* Resumo do mês: extrato único, empilhado, com Entradas/Saídas clicáveis pra abrir o detalhe */
+  .extrato-unico{ max-width:520px; }
+  .linha-extrato{ display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+    width:100%; padding:9px 2px; border-bottom:1px solid var(--line); background:none; border-left:none; border-right:none; border-top:none;
+    font-family:inherit; text-align:left; }
+  .linha-extrato.clicavel{ cursor:pointer; }
+  .linha-extrato .le-lbl{ font-size:13px; color:var(--ink-soft); white-space:nowrap; display:flex; align-items:center; gap:6px; }
+  .linha-extrato .le-val{ font-family:'Fraunces',serif; font-weight:800; font-size:15px; color:var(--ink); }
+  .seta-extrato{ display:inline-block; transition:transform .15s; font-size:11px; }
+  .secao-extrato.aberta .seta-extrato{ transform:rotate(90deg); }
+  .detalhe-extrato{ padding:2px 0 8px 18px; }
+  .detalhe-extrato .dash-cat-row{ font-size:12.5px; padding:7px 8px; }
+  .detalhe-extrato .item-lanc{ padding:6px 8px; }
 
   .grupo-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 14px;
     background:var(--paper-2); border-radius:7px; margin-top:8px; cursor:pointer; font-weight:700; font-size:13.5px; }
@@ -615,27 +615,39 @@
   <div class="view" id="view-dashboard-pf">
     <div class="panel">
       <h2>Resumo do mês</h2>
-      <p class="desc">Clique num mês pra ver o resumo daquele período. O saldo dos bancos ali ao lado é sempre o ponto de partida — some tudo, e o restante é entradas menos saídas até chegar no saldo final.</p>
+      <p class="desc">Clique num mês pra ver o resumo daquele período. Clique em Entradas ou Saídas pra abrir o detalhe por categoria.</p>
       <div class="month-ruler" id="mesesResumoRuler" style="margin-bottom:14px;"></div>
 
-      <div class="resumo-mes-2col">
-        <div class="resumo-mes-fluxo">
-          <div class="bank-card total" style="margin-bottom:12px;justify-content:space-between;">
-            <span class="bc-name">Saldo Bancos</span>
-            <input type="text" inputmode="decimal" id="bTotalBancos" class="input-moeda" style="width:140px;text-align:right;font-weight:800;font-size:15px;">
-          </div>
-          <div class="saldo-cards compact" id="saldoCards"></div>
+      <div class="extrato-unico">
+        <div class="linha-extrato">
+          <span class="le-lbl" id="labelSaldoInicial">Saldo Bancos <span style="color:var(--ink-soft);font-weight:400;">(inicial)</span></span>
+          <input type="text" inputmode="decimal" id="bTotalBancos" class="input-moeda le-val" style="width:110px;text-align:right;border:none;background:none;padding:0;">
+          <span class="le-val" id="saldoInicialReadonly" style="display:none;"></span>
         </div>
 
-        <div class="resumo-mes-detalhe">
-          <div class="dash-cat-row" style="background:var(--green-bg);cursor:default;font-weight:800;">
-            <span>ENTRADAS</span><span class="dash-val" id="detalheTotalEntradas"></span>
-          </div>
-          <div id="detalheEntradas"></div>
-          <div class="dash-cat-row" style="background:var(--red-bg);cursor:default;font-weight:800;margin-top:14px;">
-            <span>SAÍDAS</span><span class="dash-val" id="detalheTotalSaidas"></span>
-          </div>
-          <div id="detalheSaidas"></div>
+        <div class="secao-extrato" id="secaoEntradas">
+          <button type="button" class="linha-extrato clicavel" id="toggleEntradas">
+            <span class="le-lbl" style="color:var(--green);"><span class="seta-extrato">▸</span> Entradas</span>
+            <span class="le-val" id="totalEntradasHeader" style="color:var(--green);"></span>
+          </button>
+          <div class="detalhe-extrato" id="detalheEntradas" style="display:none;"></div>
+        </div>
+
+        <div class="secao-extrato" id="secaoSaidas">
+          <button type="button" class="linha-extrato clicavel" id="toggleSaidas">
+            <span class="le-lbl" style="color:var(--red);"><span class="seta-extrato">▸</span> Saídas</span>
+            <span class="le-val" id="totalSaidasHeader" style="color:var(--red);"></span>
+          </button>
+          <div class="detalhe-extrato" id="detalheSaidas" style="display:none;"></div>
+        </div>
+
+        <div class="linha-extrato" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px;">
+          <span class="le-lbl">Resultado Operacional</span>
+          <span class="le-val" id="resultadoOperacionalVal"></span>
+        </div>
+        <div class="linha-extrato" style="border-bottom:none;padding-top:12px;">
+          <span class="le-lbl" style="font-size:14px;color:var(--ink);">Saldo Final</span>
+          <span class="le-val" id="saldoFinalVal" style="font-size:19px;"></span>
         </div>
       </div>
 
@@ -2146,18 +2158,54 @@ function renderResumoMes(){
   const resultado = entradas - saidas;
   const saldoTotal = saldoFinal[mesResumoIdx];
 
-  document.getElementById('saldoCards').innerHTML = [
-    ['(=) Saldo Inicial (Bancos)', fmt(saldoInicial[mesResumoIdx]), saldoInicial[mesResumoIdx]<0?'neg':''],
-    ['(+) Entradas', fmt(entradas), 'pos'],
-    ['(−) Saídas', fmt(saidas), 'neg'],
-    ['(=) Resultado Operacional', fmt(resultado), resultado<0?'neg':'destaque'],
-    ['(=) Saldo Final', fmt(saldoTotal), saldoTotal<0?'neg':'']
-  ].map(([lbl,val,cls])=>`<div class="saldo-card ${cls||''}"><div class="sc-val">${val}</div><div class="sc-lbl">${lbl}</div></div>`).join('');
+  // mês atual (índice 0): campo editável, é o saldo real que você digita.
+  // meses seguintes: só leitura, é o saldo final do mês anterior encadeado — não dá pra editar direto.
+  const inputBancos = document.getElementById('bTotalBancos');
+  const spanReadonly = document.getElementById('saldoInicialReadonly');
+  const labelSaldoInicial = document.getElementById('labelSaldoInicial');
+  if(mesResumoIdx === 0){
+    inputBancos.style.display = '';
+    spanReadonly.style.display = 'none';
+    labelSaldoInicial.innerHTML = 'Saldo Bancos <span style="color:var(--ink-soft);font-weight:400;">(inicial)</span>';
+  }else{
+    inputBancos.style.display = 'none';
+    spanReadonly.style.display = '';
+    spanReadonly.innerHTML = fmt(saldoInicial[mesResumoIdx]);
+    labelSaldoInicial.textContent = 'Saldo Inicial (mês anterior)';
+  }
+
+  document.getElementById('totalEntradasHeader').innerHTML = '+ ' + fmt(entradas);
+  document.getElementById('totalSaidasHeader').innerHTML = '− ' + fmt(saidas);
+  const elResultado = document.getElementById('resultadoOperacionalVal');
+  elResultado.innerHTML = fmt(resultado);
+  if(resultado>=0) elResultado.style.color = 'var(--gold)';
+  const elSaldoFinal = document.getElementById('saldoFinalVal');
+  elSaldoFinal.innerHTML = fmt(saldoTotal);
 }
 
 /* ===================== DETALHAMENTO DO MÊS SELECIONADO (lista vertical, sem tabela de 12 colunas) ===================== */
 let mesesEncerrados = [];
 let categoriasAbertasFluxo = new Set();
+let secoesExtratoAbertas = new Set(); // 'entradas' e/ou 'saidas' -- controla o extrato único
+
+document.getElementById('toggleEntradas').addEventListener('click', ()=>{
+  if(secoesExtratoAbertas.has('entradas')) secoesExtratoAbertas.delete('entradas');
+  else secoesExtratoAbertas.add('entradas');
+  aplicarEstadoSecoesExtrato();
+});
+document.getElementById('toggleSaidas').addEventListener('click', ()=>{
+  if(secoesExtratoAbertas.has('saidas')) secoesExtratoAbertas.delete('saidas');
+  else secoesExtratoAbertas.add('saidas');
+  aplicarEstadoSecoesExtrato();
+});
+function aplicarEstadoSecoesExtrato(){
+  const secE = document.getElementById('secaoEntradas'), secS = document.getElementById('secaoSaidas');
+  const abertaE = secoesExtratoAbertas.has('entradas'), abertaS = secoesExtratoAbertas.has('saidas');
+  secE.classList.toggle('aberta', abertaE);
+  document.getElementById('detalheEntradas').style.display = abertaE ? 'block' : 'none';
+  secS.classList.toggle('aberta', abertaS);
+  document.getElementById('detalheSaidas').style.display = abertaS ? 'block' : 'none';
+}
 
 document.getElementById('btnToggleEncerrado').addEventListener('click', async ()=>{
   const { mkeys } = calcularFluxoMeses();
@@ -2215,8 +2263,6 @@ function renderDetalheMes(){
   const { corpoHtml: htmlEntradas, totalTipo: totalEntradasMes } = montarLista('entrada');
   const { corpoHtml: htmlSaidas, totalTipo: totalSaidasMes } = montarLista('saida');
 
-  document.getElementById('detalheTotalEntradas').textContent = fmtTexto(totalEntradasMes);
-  document.getElementById('detalheTotalSaidas').textContent = fmtTexto(totalSaidasMes);
   document.getElementById('detalheEntradas').innerHTML = htmlEntradas || '<p style="font-size:12px;color:var(--ink-soft);padding:10px;">Sem entradas nesse mês.</p>';
   document.getElementById('detalheSaidas').innerHTML = htmlSaidas || '<p style="font-size:12px;color:var(--ink-soft);padding:10px;">Sem saídas nesse mês.</p>';
 
