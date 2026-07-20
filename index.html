@@ -2171,19 +2171,32 @@ function renderDashboard(){
 let chartRoscaSaidasInst = null;
 const CORES_GRAFICO_CATEGORIA = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
 
-// marcos redondos: de 100 em 100 mil até 1 milhão, depois de 1 em 1 milhão dali pra frente —
-// mesmo esquema já usado na tabela de projeção de investimentos.
+// marcos dessa barra: 1mm, 1.2mm, 1.5mm, 2mm -- e a mesma proporção repetida pra cada "década"
+// seguinte (2mm seguido de 2.4mm, 3mm, 4mm; depois 4mm, 4.8mm, 6mm, 8mm; e assim por diante).
+// Abaixo de 1mm, o único marco que importa aqui é o próprio 1mm.
+const MARCOS_BARRA_RESUMO = (function(){
+  const marcos = [];
+  let base = 1000000;
+  for(let d=0; d<20; d++){
+    [1,1.2,1.5,2].forEach(mult=> marcos.push(Math.round(base*mult)));
+    base *= 2;
+  }
+  return [...new Set(marcos)].sort((a,b)=>a-b);
+})();
 function marcoAnteriorValor(v){
-  if(v < 100000) return 0;
-  if(v < 1000000) return Math.floor(v/100000)*100000;
-  return Math.floor(v/1000000)*1000000;
+  let anterior = 0;
+  for(const m of MARCOS_BARRA_RESUMO){ if(m<=v) anterior=m; else break; }
+  return anterior;
 }
 function proximoMarcoValor(v){
-  if(v < 1000000) return Math.ceil((v+0.01)/100000)*100000;
-  return Math.ceil((v+0.01)/1000000)*1000000;
+  for(const m of MARCOS_BARRA_RESUMO){ if(m>v) return m; }
+  return MARCOS_BARRA_RESUMO[MARCOS_BARRA_RESUMO.length-1];
 }
 function fmtMarcoResumo(v){
-  return v>=1000000 ? ('R$ '+Math.round(v/1000000)+(v>1000000?' milhões':' milhão')) : ('R$ '+Math.round(v/1000)+' mil');
+  if(v < 1000000) return 'R$ '+Math.round(v/1000)+' mil';
+  const milhoes = v/1000000;
+  const texto = (Math.round(milhoes*10)/10).toLocaleString('pt-BR',{minimumFractionDigits: Number.isInteger(milhoes)?0:1, maximumFractionDigits:1});
+  return 'R$ '+texto+(milhoes>1?' milhões':' milhão');
 }
 
 function renderMarcoInvestimentos(){
@@ -2215,7 +2228,7 @@ function renderMarcoInvestimentos(){
 
   elLabel.textContent = 'Rumo a ' + fmtMarcoResumo(proximo) + ' investidos';
   elFill.style.width = pct.toFixed(1) + '%';
-  elFaltam.textContent = 'Faltam ' + fmtTexto(proximo - totalInvestido);
+  elFaltam.textContent = 'Faltam ' + fmtTexto(proximo - totalInvestido) + ' (' + (100-pct).toFixed(1).replace('.',',') + '%)';
   elPct.textContent = Math.round(pct) + '%';
 }
 
