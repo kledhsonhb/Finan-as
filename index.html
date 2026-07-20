@@ -620,21 +620,11 @@
 
       <div class="resumo-mes-2col">
         <div class="resumo-mes-fluxo">
-          <div class="resumo-mes-fluxo-split">
-            <div class="bank-strip compact vertical">
-              <div class="bank-card"><span class="bank-logo" style="background:#8A05BE;">N</span><span class="bc-name">Nubank</span><input type="text" inputmode="decimal" id="bNubank" class="input-moeda"></div>
-              <div class="bank-card dual">
-                <div class="bc-name" style="display:flex;align-items:center;gap:7px;"><span class="bank-logo" style="background:#EC0000;">S</span>Santander</div>
-                <div class="bc-dual-inputs">
-                  <input type="text" inputmode="decimal" id="bSantander" class="input-moeda" placeholder="Conta 1">
-                  <input type="text" inputmode="decimal" id="bSantander2" class="input-moeda" placeholder="Conta 2">
-                </div>
-              </div>
-              <div class="bank-card"><span class="bank-logo" style="background:#000000;">X</span><span class="bc-name">XP</span><input type="text" inputmode="decimal" id="bXP" class="input-moeda"></div>
-              <div class="bank-card total"><span class="bc-name">Saldo inicial (bancos)</span><span id="bTotal">R$ 0,00</span></div>
-            </div>
-            <div class="saldo-cards compact" id="saldoCards"></div>
+          <div class="bank-card total" style="margin-bottom:12px;justify-content:space-between;">
+            <span class="bc-name">Saldo Bancos</span>
+            <input type="text" inputmode="decimal" id="bTotalBancos" class="input-moeda" style="width:140px;text-align:right;font-weight:800;font-size:15px;">
           </div>
+          <div class="saldo-cards compact" id="saldoCards"></div>
         </div>
 
         <div class="resumo-mes-detalhe">
@@ -1452,7 +1442,7 @@ window._recarregarLancamentosDoStorage = async ()=>{
 };
 
 let lancamentos = [];
-let bancoSaldos = { Nubank:0, Santander:0, Santander2:0, XP:0 };
+let bancoSaldos = { Total:0 };
 let investimentos = [];
 let indices = { CDI:10.5, SELIC:10.5, IPCA:4.5 };
 let categoriasConfig = ['Recebimentos','Despesas Fixas','Carros','Bancos (Aportes)','02.6 Cartão de Crédito','Moradia','Lazer','Saúde','Educação','Outros'];
@@ -1495,14 +1485,15 @@ async function loadAll(){
   window._brapiToken = brapiToken; // disponibiliza pro módulo Ações
   setStatus(supabaseOk ? "sincronizado com o banco de dados" : "offline — usando cache local até reconectar");
 
-  document.getElementById('bNubank').value = fmtTexto(bancoSaldos.Nubank || 0);
-  document.getElementById('bSantander').value = fmtTexto(bancoSaldos.Santander || 0);
-  document.getElementById('bSantander2').value = fmtTexto(bancoSaldos.Santander2 || 0);
-  document.getElementById('bXP').value = fmtTexto(bancoSaldos.XP || 0);
-  aplicarCorValor(document.getElementById('bNubank'), bancoSaldos.Nubank || 0);
-  aplicarCorValor(document.getElementById('bSantander'), bancoSaldos.Santander || 0);
-  aplicarCorValor(document.getElementById('bSantander2'), bancoSaldos.Santander2 || 0);
-  aplicarCorValor(document.getElementById('bXP'), bancoSaldos.XP || 0);
+  // migração única: quem já tinha saldo separado por banco (Nubank/Santander/XP) tem o valor
+  // somado automaticamente pro campo único "Saldo Bancos" — sem perder o que já tinha digitado.
+  if(bancoSaldos.Total===undefined){
+    const somaAntiga = ['Nubank','Santander','Santander2','XP'].reduce((s,k)=> s+Number(bancoSaldos[k]||0), 0);
+    bancoSaldos = { Total: somaAntiga };
+    await saveBancos();
+  }
+  document.getElementById('bTotalBancos').value = fmtTexto(bancoSaldos.Total || 0);
+  aplicarCorValor(document.getElementById('bTotalBancos'), bancoSaldos.Total || 0);
   document.getElementById('idxCDI').value = indices.CDI;
   document.getElementById('idxSELIC').value = indices.SELIC;
   document.getElementById('idxIPCA').value = indices.IPCA;
@@ -2081,19 +2072,18 @@ function aplicarCorValor(el, valor){
   el.style.color = valor < 0 ? 'var(--red)' : '';
   el.style.fontWeight = valor < 0 ? '800' : '700';
 }
-['bNubank','bSantander','bSantander2','bXP'].forEach(id=>{
-  const el = document.getElementById(id);
+{
+  const el = document.getElementById('bTotalBancos');
   el.addEventListener('focus', ()=>{ el.value = el.value ? parseMoedaInput(el.value) : ''; }); // mostra número puro pra editar
   el.addEventListener('blur', async (e)=>{
-    const map = {bNubank:'Nubank', bSantander:'Santander', bSantander2:'Santander2', bXP:'XP'};
     const valor = parseMoedaInput(e.target.value);
-    bancoSaldos[map[id]] = valor;
+    bancoSaldos.Total = valor;
     e.target.value = fmtTexto(valor);
     aplicarCorValor(e.target, valor);
     await saveBancos();
     renderDashboard();
   });
-});
+}
 
 /* ===================== DASHBOARD ===================== */
 // meses do "Resumo do mês" no Fluxo de Caixa: do mês atual até dezembro do ano que vem
@@ -2131,10 +2121,6 @@ function calcularFluxoMeses(){
 let mesResumoIdx = 0;
 
 function renderDashboard(){
-  const totalBancos = Object.values(bancoSaldos).reduce((s,v)=>s+Number(v||0),0);
-  document.getElementById('bTotal').textContent = fmtTexto(totalBancos);
-  document.getElementById('bTotal').style.color = totalBancos < 0 ? 'var(--red)' : '';
-
   renderResumoMes();
   renderDetalheMes();
 }
@@ -2161,11 +2147,11 @@ function renderResumoMes(){
   const saldoTotal = saldoFinal[mesResumoIdx];
 
   document.getElementById('saldoCards').innerHTML = [
-    ['Saldo inicial do mês', fmt(saldoInicial[mesResumoIdx]), saldoInicial[mesResumoIdx]<0?'neg':''],
-    ['Entradas do mês', fmt(entradas), 'pos'],
-    ['Saídas do mês', fmt(saidas), 'neg'],
-    ['Resultado do mês', fmt(resultado), resultado<0?'neg':'destaque'],
-    ['Saldo final (bancos + entradas − saídas)', fmt(saldoTotal), saldoTotal<0?'neg':'']
+    ['(=) Saldo Inicial (Bancos)', fmt(saldoInicial[mesResumoIdx]), saldoInicial[mesResumoIdx]<0?'neg':''],
+    ['(+) Entradas', fmt(entradas), 'pos'],
+    ['(−) Saídas', fmt(saidas), 'neg'],
+    ['(=) Resultado Operacional', fmt(resultado), resultado<0?'neg':'destaque'],
+    ['(=) Saldo Final', fmt(saldoTotal), saldoTotal<0?'neg':'']
   ].map(([lbl,val,cls])=>`<div class="saldo-card ${cls||''}"><div class="sc-val">${val}</div><div class="sc-lbl">${lbl}</div></div>`).join('');
 }
 
