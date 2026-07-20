@@ -660,9 +660,14 @@
 
         <div class="resumo-mes-graficos">
           <div>
-            <div class="mini-grafico-titulo">Tendência do saldo final</div>
-            <div style="position:relative;height:120px;">
-              <canvas id="chartTendenciaSaldo" role="img" aria-label="Linha do saldo final projetado, mês a mês"></canvas>
+            <div class="mini-grafico-titulo">Marco de investimentos</div>
+            <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 6px;" id="marcoLabelAtual"></p>
+            <div style="height:10px;border-radius:5px;background:var(--paper-2);overflow:hidden;">
+              <div id="marcoBarraFill" style="height:100%;width:0%;border-radius:5px;background:var(--green);transition:width .3s;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;">
+              <span style="font-size:11.5px;color:var(--ink-soft);" id="marcoFaltam"></span>
+              <span style="font-size:11.5px;color:var(--ink-soft);" id="marcoPct"></span>
             </div>
           </div>
           <div>
@@ -2163,36 +2168,55 @@ function renderDashboard(){
   renderDetalheMes();
 }
 
-let chartTendenciaSaldoInst = null;
 let chartRoscaSaidasInst = null;
 const CORES_GRAFICO_CATEGORIA = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
 
-function renderGraficoTendenciaSaldo(mkeys, saldoFinal){
-  const canvas = document.getElementById('chartTendenciaSaldo');
-  if(!canvas || typeof Chart==='undefined') return;
-  const labels = mkeys.map(mk=>{
-    const [y,m] = mk.split('-');
-    return MESES[Number(m)-1].slice(0,3).toUpperCase()+'/'+y.slice(2);
-  });
-  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-  const corGrid = isDark ? '#2c2c2a' : '#e1e0d9';
-  const corMuted = '#898781';
-  if(chartTendenciaSaldoInst) chartTendenciaSaldoInst.destroy();
-  chartTendenciaSaldoInst = new Chart(canvas, {
-    type:'line',
-    data:{ labels, datasets:[{
-      data: saldoFinal, borderColor:'#2a78d6', backgroundColor:'rgba(42,120,214,0.12)',
-      fill:true, tension:0.3, pointRadius:2, pointHoverRadius:4, pointBackgroundColor:'#2a78d6', borderWidth:2
-    }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c => fmtTexto(c.parsed.y) } } },
-      scales:{
-        y:{ grid:{color:corGrid}, ticks:{ font:{size:9}, color:corMuted, maxTicksLimit:4, callback:v=>fmtSemDecimais(v) } },
-        x:{ grid:{display:false}, ticks:{ font:{size:9}, color:corMuted, maxRotation:0, autoSkip:true, maxTicksLimit:6 } }
-      }
-    }
-  });
+// marcos redondos: de 100 em 100 mil até 1 milhão, depois de 1 em 1 milhão dali pra frente —
+// mesmo esquema já usado na tabela de projeção de investimentos.
+function marcoAnteriorValor(v){
+  if(v < 100000) return 0;
+  if(v < 1000000) return Math.floor(v/100000)*100000;
+  return Math.floor(v/1000000)*1000000;
+}
+function proximoMarcoValor(v){
+  if(v < 1000000) return Math.ceil((v+0.01)/100000)*100000;
+  return Math.ceil((v+0.01)/1000000)*1000000;
+}
+function fmtMarcoResumo(v){
+  return v>=1000000 ? ('R$ '+Math.round(v/1000000)+(v>1000000?' milhões':' milhão')) : ('R$ '+Math.round(v/1000)+' mil');
+}
+
+function renderMarcoInvestimentos(){
+  const elLabel = document.getElementById('marcoLabelAtual');
+  const elFill = document.getElementById('marcoBarraFill');
+  const elFaltam = document.getElementById('marcoFaltam');
+  const elPct = document.getElementById('marcoPct');
+  if(!elLabel) return;
+
+  // usa a MESMA projeção já calculada pro Dashboard Financeiro (ultimasProjecoesInv), não só
+  // o saldo de hoje -- assim, ao clicar num mês diferente na tira de cima, o marco também
+  // muda pra refletir quanto estará investido projetado naquele mês específico.
+  // porMes[0] ali é "HOJE" e porMes[1] é o fim do mês atual -- por isso o +1 no índice.
+  let totalInvestido;
+  if(ultimasProjecoesInv && ultimasProjecoesInv.length){
+    const idxProjecao = mesResumoIdx + 1;
+    totalInvestido = ultimasProjecoesInv.reduce((s,p)=>{
+      const v = p.porMes[idxProjecao];
+      return s + (v===null || v===undefined ? 0 : v);
+    }, 0);
+  }else{
+    totalInvestido = investimentos.reduce((s,inv)=> s + saldoAtualInvestimento(inv), 0);
+  }
+
+  const anterior = marcoAnteriorValor(totalInvestido);
+  const proximo = proximoMarcoValor(totalInvestido);
+  const faixa = proximo - anterior;
+  const pct = faixa>0 ? Math.min(100, Math.max(0, (totalInvestido-anterior)/faixa*100)) : 0;
+
+  elLabel.textContent = 'Rumo a ' + fmtMarcoResumo(proximo) + ' investidos';
+  elFill.style.width = pct.toFixed(1) + '%';
+  elFaltam.textContent = 'Faltam ' + fmtTexto(proximo - totalInvestido);
+  elPct.textContent = Math.round(pct) + '%';
 }
 
 function renderGraficoSaidasCategoria(mk, porCategoriaSaida){
@@ -2273,7 +2297,7 @@ function renderResumoMes(){
   const elSaldoFinal = document.getElementById('saldoFinalVal');
   elSaldoFinal.innerHTML = fmt(saldoTotal);
 
-  renderGraficoTendenciaSaldo(mkeys, saldoFinal);
+  renderMarcoInvestimentos();
 }
 
 /* ===================== DETALHAMENTO DO MÊS SELECIONADO (lista vertical, sem tabela de 12 colunas) ===================== */
