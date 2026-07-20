@@ -318,7 +318,13 @@
   .saldo-cards.compact .saldo-card .sc-lbl{ font-size:9.5px; }
 
   /* Resumo do mês: extrato único, empilhado, com Entradas/Saídas clicáveis pra abrir o detalhe */
-  .extrato-unico{ max-width:520px; }
+  .resumo-mes-col2{ display:grid; grid-template-columns:minmax(0,460px) 1fr; gap:36px; align-items:start; }
+  .extrato-unico{ width:100%; }
+  .resumo-mes-graficos{ display:flex; flex-direction:column; gap:22px; padding-top:2px; }
+  .mini-grafico-titulo{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--ink-soft); margin-bottom:8px; }
+  @media (max-width:900px){
+    .resumo-mes-col2{ grid-template-columns:1fr; gap:24px; }
+  }
   .linha-extrato{ display:flex; justify-content:space-between; align-items:baseline; gap:14px;
     width:100%; padding:9px 2px; border-bottom:1px solid var(--line); background:none; border-left:none; border-right:none; border-top:none;
     font-family:inherit; text-align:left; }
@@ -618,36 +624,56 @@
       <p class="desc">Clique num mês pra ver o resumo daquele período. Clique em Entradas ou Saídas pra abrir o detalhe por categoria.</p>
       <div class="month-ruler" id="mesesResumoRuler" style="margin-bottom:14px;"></div>
 
-      <div class="extrato-unico">
-        <div class="linha-extrato">
-          <span class="le-lbl" id="labelSaldoInicial">Saldo Bancos <span style="color:var(--ink-soft);font-weight:400;">(inicial)</span></span>
-          <input type="text" inputmode="decimal" id="bTotalBancos" class="input-moeda le-val" style="width:110px;text-align:right;border:none;background:none;padding:0;">
-          <span class="le-val" id="saldoInicialReadonly" style="display:none;"></span>
+      <div class="resumo-mes-col2">
+        <div class="extrato-unico">
+          <div class="linha-extrato">
+            <span class="le-lbl" id="labelSaldoInicial">Saldo Bancos <span style="color:var(--ink-soft);font-weight:400;">(inicial)</span></span>
+            <input type="text" inputmode="decimal" id="bTotalBancos" class="input-moeda le-val" style="width:110px;text-align:right;border:none;background:none;padding:0;">
+            <span class="le-val" id="saldoInicialReadonly" style="display:none;"></span>
+          </div>
+
+          <div class="secao-extrato" id="secaoEntradas">
+            <button type="button" class="linha-extrato clicavel" id="toggleEntradas">
+              <span class="le-lbl" style="color:var(--green);"><span class="seta-extrato">▸</span> Entradas</span>
+              <span class="le-val" id="totalEntradasHeader" style="color:var(--green);"></span>
+            </button>
+            <div class="detalhe-extrato" id="detalheEntradas" style="display:none;"></div>
+          </div>
+
+          <div class="secao-extrato" id="secaoSaidas">
+            <button type="button" class="linha-extrato clicavel" id="toggleSaidas">
+              <span class="le-lbl" style="color:var(--red);"><span class="seta-extrato">▸</span> Saídas</span>
+              <span class="le-val" id="totalSaidasHeader" style="color:var(--red);"></span>
+            </button>
+            <div class="detalhe-extrato" id="detalheSaidas" style="display:none;"></div>
+          </div>
+
+          <div class="linha-extrato" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px;">
+            <span class="le-lbl">Resultado Operacional</span>
+            <span class="le-val" id="resultadoOperacionalVal"></span>
+          </div>
+          <div class="linha-extrato" style="border-bottom:none;padding-top:12px;">
+            <span class="le-lbl" style="font-size:14px;color:var(--ink);">Saldo Final</span>
+            <span class="le-val" id="saldoFinalVal" style="font-size:19px;"></span>
+          </div>
         </div>
 
-        <div class="secao-extrato" id="secaoEntradas">
-          <button type="button" class="linha-extrato clicavel" id="toggleEntradas">
-            <span class="le-lbl" style="color:var(--green);"><span class="seta-extrato">▸</span> Entradas</span>
-            <span class="le-val" id="totalEntradasHeader" style="color:var(--green);"></span>
-          </button>
-          <div class="detalhe-extrato" id="detalheEntradas" style="display:none;"></div>
-        </div>
-
-        <div class="secao-extrato" id="secaoSaidas">
-          <button type="button" class="linha-extrato clicavel" id="toggleSaidas">
-            <span class="le-lbl" style="color:var(--red);"><span class="seta-extrato">▸</span> Saídas</span>
-            <span class="le-val" id="totalSaidasHeader" style="color:var(--red);"></span>
-          </button>
-          <div class="detalhe-extrato" id="detalheSaidas" style="display:none;"></div>
-        </div>
-
-        <div class="linha-extrato" style="border-top:1px solid var(--line);margin-top:4px;padding-top:10px;">
-          <span class="le-lbl">Resultado Operacional</span>
-          <span class="le-val" id="resultadoOperacionalVal"></span>
-        </div>
-        <div class="linha-extrato" style="border-bottom:none;padding-top:12px;">
-          <span class="le-lbl" style="font-size:14px;color:var(--ink);">Saldo Final</span>
-          <span class="le-val" id="saldoFinalVal" style="font-size:19px;"></span>
+        <div class="resumo-mes-graficos">
+          <div>
+            <div class="mini-grafico-titulo">Tendência do saldo final</div>
+            <div style="position:relative;height:120px;">
+              <canvas id="chartTendenciaSaldo" role="img" aria-label="Linha do saldo final projetado, mês a mês"></canvas>
+            </div>
+          </div>
+          <div>
+            <div class="mini-grafico-titulo" id="tituloRoscaSaidas">Saídas por categoria</div>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div style="position:relative;height:104px;width:104px;flex:none;">
+                <canvas id="chartRoscaSaidas" role="img" aria-label="Rosca de saídas por categoria do mês selecionado"></canvas>
+              </div>
+              <div id="legendaRoscaSaidas" style="display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--ink-soft);min-width:0;"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2137,6 +2163,71 @@ function renderDashboard(){
   renderDetalheMes();
 }
 
+let chartTendenciaSaldoInst = null;
+let chartRoscaSaidasInst = null;
+const CORES_GRAFICO_CATEGORIA = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
+
+function renderGraficoTendenciaSaldo(mkeys, saldoFinal){
+  const canvas = document.getElementById('chartTendenciaSaldo');
+  if(!canvas || typeof Chart==='undefined') return;
+  const labels = mkeys.map(mk=>{
+    const [y,m] = mk.split('-');
+    return MESES[Number(m)-1].slice(0,3).toUpperCase()+'/'+y.slice(2);
+  });
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const corGrid = isDark ? '#2c2c2a' : '#e1e0d9';
+  const corMuted = '#898781';
+  if(chartTendenciaSaldoInst) chartTendenciaSaldoInst.destroy();
+  chartTendenciaSaldoInst = new Chart(canvas, {
+    type:'line',
+    data:{ labels, datasets:[{
+      data: saldoFinal, borderColor:'#2a78d6', backgroundColor:'rgba(42,120,214,0.12)',
+      fill:true, tension:0.3, pointRadius:2, pointHoverRadius:4, pointBackgroundColor:'#2a78d6', borderWidth:2
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c => fmtTexto(c.parsed.y) } } },
+      scales:{
+        y:{ grid:{color:corGrid}, ticks:{ font:{size:9}, color:corMuted, maxTicksLimit:4, callback:v=>fmtSemDecimais(v) } },
+        x:{ grid:{display:false}, ticks:{ font:{size:9}, color:corMuted, maxRotation:0, autoSkip:true, maxTicksLimit:6 } }
+      }
+    }
+  });
+}
+
+function renderGraficoSaidasCategoria(mk, porCategoriaSaida){
+  const canvas = document.getElementById('chartRoscaSaidas');
+  if(!canvas || typeof Chart==='undefined') return;
+  const [y,m] = mk.split('-');
+  document.getElementById('tituloRoscaSaidas').textContent = 'Saídas por categoria — ' + MESES[Number(m)-1].slice(0,3).toUpperCase()+'/'+y.slice(2);
+
+  const entradas = Object.entries(porCategoriaSaida).sort((a,b)=>b[1]-a[1]);
+  const total = entradas.reduce((s,[,v])=>s+v, 0);
+  const top = entradas.slice(0,7);
+  const outros = entradas.slice(7).reduce((s,[,v])=>s+v,0);
+  const labels = top.map(([c])=>c).concat(outros>0.01 ? ['Outros'] : []);
+  const valores = top.map(([,v])=>v).concat(outros>0.01 ? [outros] : []);
+  const cores = labels.map((_,i)=>CORES_GRAFICO_CATEGORIA[i%CORES_GRAFICO_CATEGORIA.length]);
+
+  const legenda = document.getElementById('legendaRoscaSaidas');
+  if(chartRoscaSaidasInst){ chartRoscaSaidasInst.destroy(); chartRoscaSaidasInst = null; }
+  if(!labels.length){
+    legenda.innerHTML = '<span>Sem saídas nesse mês.</span>';
+    return;
+  }
+  legenda.innerHTML = labels.map((l,i)=>{
+    const pct = total ? Math.round(valores[i]/total*100) : 0;
+    return `<span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:${cores[i]};flex:none;"></span>${l} · ${pct}%</span>`;
+  }).join('');
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  chartRoscaSaidasInst = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data: valores, backgroundColor: cores, borderColor: isDark?'#1a1a19':'#fff', borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c => c.label+': '+fmtTexto(c.parsed) } } } }
+  });
+}
+
 function renderResumoMes(){
   const { mkeys, totalEntradas, totalSaidas, saldoInicial, saldoFinal } = calcularFluxoMeses();
   const labels = mkeys.map(mk=>{
@@ -2181,6 +2272,8 @@ function renderResumoMes(){
   if(resultado>=0) elResultado.style.color = 'var(--gold)';
   const elSaldoFinal = document.getElementById('saldoFinalVal');
   elSaldoFinal.innerHTML = fmt(saldoTotal);
+
+  renderGraficoTendenciaSaldo(mkeys, saldoFinal);
 }
 
 /* ===================== DETALHAMENTO DO MÊS SELECIONADO (lista vertical, sem tabela de 12 colunas) ===================== */
@@ -2265,6 +2358,12 @@ function renderDetalheMes(){
 
   document.getElementById('detalheEntradas').innerHTML = htmlEntradas || '<p style="font-size:12px;color:var(--ink-soft);padding:10px;">Sem entradas nesse mês.</p>';
   document.getElementById('detalheSaidas').innerHTML = htmlSaidas || '<p style="font-size:12px;color:var(--ink-soft);padding:10px;">Sem saídas nesse mês.</p>';
+
+  const porCategoriaSaida = {};
+  Object.keys(struct.saida).forEach(cat=>{
+    porCategoriaSaida[cat] = struct.saida[cat].reduce((s,l)=> s + Number(l.valor), 0);
+  });
+  renderGraficoSaidasCategoria(mk, porCategoriaSaida);
 
   document.querySelectorAll('#detalheEntradas .dash-cat-row, #detalheSaidas .dash-cat-row').forEach(row=>{
     row.addEventListener('click', ()=>{
